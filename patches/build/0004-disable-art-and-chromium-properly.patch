@@ -1,0 +1,30 @@
+From f8d778de0df902b916d7dc6649b1a96484bb85bb Mon Sep 17 00:00:00 2001
+From: Conn O'Griofa <connogriofa@gmail.com>
+Date: Tue, 14 Jan 2014 22:38:53 +0000
+Subject: [PATCH] Disable art & chromium properly
+
+Change-Id: I7c29d26f9b022c38fac051ded8f654dac29bc6ee
+---
+ target/product/core_minimal.mk | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/target/product/core_minimal.mk b/target/product/core_minimal.mk
+index 159e7b2..69bd7cd 100644
+--- a/target/product/core_minimal.mk
++++ b/target/product/core_minimal.mk
+@@ -57,9 +57,10 @@ PRODUCT_PACKAGES += \
+     sensorservice \
+     uiautomator
+ 
+-PRODUCT_BOOT_JARS := core:conscrypt:okhttp:core-junit:bouncycastle:ext:framework:framework2:android.policy:services:apache-xml:webviewchromium
++#PRODUCT_BOOT_JARS := core:conscrypt:okhttp:core-junit:bouncycastle:ext:framework:framework2:android.policy:services:apache-xml:webviewchromium
++PRODUCT_BOOT_JARS := core:conscrypt:okhttp:core-junit:bouncycastle:ext:framework:framework2:android.policy:services:apache-xml
+ 
+ PRODUCT_RUNTIMES := runtime_libdvm_default
+-PRODUCT_RUNTIMES += runtime_libart
++#PRODUCT_RUNTIMES += runtime_libart
+ 
+ $(call inherit-product, $(SRC_TARGET_DIR)/product/base.mk)
+-- 
+1.8.5.2
+

@@ -1,0 +1,124 @@
+From e2027ed45f5af46495a6fcef7de86b2a1271c41b Mon Sep 17 00:00:00 2001
+From: AndroidMeda <hephappy@gmail.com>
+Date: Sun, 6 Jan 2013 23:12:32 +0200
+Subject: [PATCH] releasetools: Move packages into extras
+
+Instead of removing packages from makefiles,
+move them into extras folder in the ota(zip) file.
+
+By default, build/tools/releasetools/extras.txt is used.
+If you want to customise it, define this in your BoardConfig:
+
+TARGET_OTA_EXTRAS_FILE := device/VENDORNAME/DEVICENAME/extras.txt
+
+Change-Id: I3d86914ccf262fc02b37d9789e21c1ec0d837701
+---
+ core/Makefile                            |  7 +++++++
+ tools/releasetools/extras.txt            |  7 +++++++
+ tools/releasetools/ota_from_target_files | 16 ++++++++++++++--
+ 3 files changed, 28 insertions(+), 2 deletions(-)
+ create mode 100644 tools/releasetools/extras.txt
+
+diff --git a/core/Makefile b/core/Makefile
+index 71fa9b7..e5ca669 100644
+--- a/core/Makefile
++++ b/core/Makefile
+@@ -1434,6 +1434,12 @@ else
+     $(INTERNAL_OTA_PACKAGE_TARGET): override_device := $(TARGET_OTA_ASSERT_DEVICE)
+ endif
+ 
++ifneq ($(TARGET_OTA_EXTRAS_FILE),)
++    $(INTERNAL_OTA_PACKAGE_TARGET): extras_file := $(TARGET_OTA_EXTRAS_FILE)
++else
++    $(INTERNAL_OTA_PACKAGE_TARGET): extras_file := build/tools/releasetools/extras.txt
++endif
++
+ $(INTERNAL_OTA_PACKAGE_TARGET): $(BUILT_TARGET_FILES_PACKAGE) $(DISTTOOLS)
+ 	@echo "$(OTA_FROM_TARGET_SCRIPT)" > $(PRODUCT_OUT)/ota_script_path
+ 	@echo "$(override_device)" > $(PRODUCT_OUT)/ota_override_device
+@@ -1444,6 +1450,7 @@ $(INTERNAL_OTA_PACKAGE_TARGET): $(BUILT_TARGET_FILES_PACKAGE) $(DISTTOOLS)
+ 	   -k $(KEY_CERT_PAIR) \
+ 	   --backup=$(backuptool) \
+ 	   --override_device=$(override_device) \
++	   --extras_file=$(extras_file) \
+ 	   $(BUILT_TARGET_FILES_PACKAGE) $@
+ 
+ .PHONY: otapackage bacon
+diff --git a/tools/releasetools/extras.txt b/tools/releasetools/extras.txt
+new file mode 100644
+index 0000000..2ba20f4
+--- /dev/null
++++ b/tools/releasetools/extras.txt
+@@ -0,0 +1,7 @@
++app/Example.apk
++
++fonts/Example.ttf
++
++lib/libexample.so
++
++media/audio/ringtones/Example.ogg
+diff --git a/tools/releasetools/ota_from_target_files b/tools/releasetools/ota_from_target_files
+index f1617b1..35c18b1 100755
+--- a/tools/releasetools/ota_from_target_files
++++ b/tools/releasetools/ota_from_target_files
+@@ -59,6 +59,9 @@ Usage:  ota_from_target_files [flags] input_target_files output_ota_package
+   --override_device <device>
+       Override device-specific asserts. Can be a comma-separated list.
+ 
++  --extras_file <file>
++      Extras file
++
+ """
+ 
+ import sys
+@@ -97,6 +100,8 @@ OPTIONS.aslr_mode = True
+ OPTIONS.worker_threads = 3
+ OPTIONS.backuptool = False
+ OPTIONS.override_device = 'auto'
++OPTIONS.extras_file = 'build/tools/releasetools/extras.txt'
++
+ 
+ def MostPopularKey(d, default):
+   """Given a dict, return the key corresponding to the largest
+@@ -314,6 +319,7 @@ def CopySystemFiles(input_zip, output_zip=None,
+   """
+ 
+   symlinks = []
++  extras_list = [line.strip() for line in open(OPTIONS.extras_file)]
+ 
+   for info in input_zip.infolist():
+     if info.filename.startswith("SYSTEM/"):
+@@ -323,7 +329,10 @@ def CopySystemFiles(input_zip, output_zip=None,
+                          "/system/" + basefilename))
+       else:
+         info2 = copy.copy(info)
+-        fn = info2.filename = "system/" + basefilename
++        if basefilename in extras_list:
++          fn = info2.filename = "extras/" + basefilename
++        else:
++          fn = info2.filename = "system/" + basefilename
+         if substitute and fn in substitute and substitute[fn] is None:
+           continue
+         if output_zip is not None:
+@@ -847,6 +856,8 @@ def main(argv):
+       OPTIONS.backuptool = bool(a.lower() == 'true')
+     elif o in ("--override_device"):
+       OPTIONS.override_device = a
++    elif o in ("--extras_file"):
++      OPTIONS.extras_file = str(a)
+     else:
+       return False
+     return True
+@@ -862,7 +873,8 @@ def main(argv):
+                                               "worker_threads=",
+                                               "aslr_mode=",
+                                               "backup=",
+-                                              "override_device="],
++                                              "override_device=",
++                                              "extras_file="],
+                              extra_option_handler=option_handler)
+ 
+   if len(args) != 2:
+-- 
+1.8.5.2
+

@@ -1,12 +1,15 @@
-From 44355ddb82b68b35beaf5fbc6237664aa8d8a702 Mon Sep 17 00:00:00 2001
+From c3183ee0b3cfd47cde2bc072fa048d923d4d9aa7 Mon Sep 17 00:00:00 2001
 From: Konsta <konsta09@gmail.com>
 Date: Tue, 8 Jan 2013 16:18:29 +0200
-Subject: [PATCH] swipe to switch notification changes
+Subject: [PATCH 06/13] swipe to switch notification changes
 
 -increase swipe gesture lenght
 -don't limit swipe detection to bottom bar
 
 Change-Id: I789c855a004716ff1d3199bc8348811fb33f532d
+---
+ .../statusbar/phone/NotificationPanelView.java     |    6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
 
 diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/phone/NotificationPanelView.java b/packages/SystemUI/src/com/android/systemui/statusbar/phone/NotificationPanelView.java
 index 14166cb..5d6e514 100644
@@ -32,3 +35,6 @@ index 14166cb..5d6e514 100644
                      mOkToFlip = getExpandedHeight() == 0;
                      if (event.getX(0) > getWidth() * (1.0f - STATUS_BAR_SETTINGS_RIGHT_PERCENTAGE) &&
                              Settings.System.getIntForUser(getContext().getContentResolver(),
+-- 
+1.7.9.5
+

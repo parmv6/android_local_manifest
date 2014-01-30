@@ -1,0 +1,46 @@
+From 0e0db4d68ad305a94816aebee79c85976099d274 Mon Sep 17 00:00:00 2001
+From: zeelog <zeelogkang@gmail.com>
+Date: Wed, 29 Jan 2014 08:40:34 +0100
+Subject: [PATCH] Turn off all animations
+
+Change-Id: I5cc876634be734e6f1726ba0455be22dca54701f
+---
+ packages/SettingsProvider/res/values/defaults.xml             | 4 ++--
+ services/java/com/android/server/wm/WindowManagerService.java | 6 +++---
+ 2 files changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/packages/SettingsProvider/res/values/defaults.xml b/packages/SettingsProvider/res/values/defaults.xml
+index e58ba78..774a30e 100644
+--- a/packages/SettingsProvider/res/values/defaults.xml
++++ b/packages/SettingsProvider/res/values/defaults.xml
+@@ -29,8 +29,8 @@
+     <!-- Default screen brightness, from 0 to 255.  102 is 40%. -->
+     <integer name="def_screen_brightness">102</integer>
+     <bool name="def_screen_brightness_automatic_mode">false</bool>
+-    <fraction name="def_window_animation_scale">100%</fraction>
+-    <fraction name="def_window_transition_scale">100%</fraction>
++    <fraction name="def_window_animation_scale">0%</fraction>
++    <fraction name="def_window_transition_scale">0%</fraction>
+     <bool name="def_haptic_feedback">true</bool>
+ 
+     <bool name="def_bluetooth_on">false</bool>
+diff --git a/services/java/com/android/server/wm/WindowManagerService.java b/services/java/com/android/server/wm/WindowManagerService.java
+index 70abc4f..4a6c0d4 100644
+--- a/services/java/com/android/server/wm/WindowManagerService.java
++++ b/services/java/com/android/server/wm/WindowManagerService.java
+@@ -547,9 +547,9 @@ public class WindowManagerService extends IWindowManager.Stub
+ 
+     PowerManagerService mPowerManager;
+ 
+-    float mWindowAnimationScale = 1.0f;
+-    float mTransitionAnimationScale = 1.0f;
+-    float mAnimatorDurationScale = 1.0f;
++    float mWindowAnimationScale = 0f;
++    float mTransitionAnimationScale = 0f;
++    float mAnimatorDurationScale = 0f;
+ 
+     final InputManagerService mInputManager;
+     final DisplayManagerService mDisplayManagerService;
+-- 
+1.8.5.2
+

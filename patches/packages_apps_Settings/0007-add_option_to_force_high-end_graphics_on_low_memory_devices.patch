@@ -1,0 +1,100 @@
+From 2122d2bffb266c999f1a3eb0ff69c5ac66fcc3b9 Mon Sep 17 00:00:00 2001
+From: Konsta <konsta09@gmail.com>
+Date: Mon, 13 Jan 2014 21:24:03 +0200
+Subject: [PATCH] add option to force high-end graphics on low memory devices
+
+Change-Id: I34e0d7381615485b58385abed743e01f7272772d
+---
+ res/values/cm_strings.xml                                |  4 ++++
+ res/xml/performance_settings.xml                         |  5 +++++
+ .../settings/cyanogenmod/PerformanceSettings.java        | 16 ++++++++++++++++
+ 3 files changed, 25 insertions(+)
+
+diff --git a/res/values/cm_strings.xml b/res/values/cm_strings.xml
+index 89c606c..ad779f5 100644
+--- a/res/values/cm_strings.xml
++++ b/res/values/cm_strings.xml
+@@ -568,6 +568,10 @@ two in order to insert additional control points. \'Remove\' deletes the selecte
+     <string name="pref_use_16bpp_alpha_title">16bit transparency</string>
+     <string name="pref_use_16bpp_alpha_summary">Better graphics performance, but lower quality and may cause visual artifacts (requires reboot)</string>
+ 
++    <!-- Performance : Force high-end graphics -->
++    <string name="pref_force_highend_gfx_title">Force high-end graphics</string>
++    <string name="pref_force_highend_gfx_summary">Enables high-end visual effects such as transparent status/navigation bar (requires reboot)</string>
++
+     <!-- Kill app long-press back -->
+     <string name="kill_app_longpress_back">Kill app back button</string>
+     <string name="kill_app_longpress_back_summary">Kill the foreground app by long-pressing the back button</string>
+diff --git a/res/xml/performance_settings.xml b/res/xml/performance_settings.xml
+index 794dd02..f1e3f76 100644
+--- a/res/xml/performance_settings.xml
++++ b/res/xml/performance_settings.xml
+@@ -57,6 +57,11 @@
+         android:summary="@string/pref_use_16bpp_alpha_summary" />
+ 
+     <CheckBoxPreference
++        android:key="pref_force_highend_gfx"
++        android:title="@string/pref_force_highend_gfx_title"
++        android:summary="@string/pref_force_highend_gfx_summary" />
++
++    <CheckBoxPreference
+         android:key="pref_disable_bootanimation"
+         android:title="@string/pref_disable_bootanimation_title"
+         android:summary="@string/pref_disable_bootanimation_summary" />
+diff --git a/src/com/android/settings/cyanogenmod/PerformanceSettings.java b/src/com/android/settings/cyanogenmod/PerformanceSettings.java
+index a88c805..b780241 100644
+--- a/src/com/android/settings/cyanogenmod/PerformanceSettings.java
++++ b/src/com/android/settings/cyanogenmod/PerformanceSettings.java
+@@ -16,6 +16,7 @@
+ 
+ package com.android.settings.cyanogenmod;
+ 
++import android.app.ActivityManager;
+ import android.app.AlertDialog;
+ import android.content.ContentResolver;
+ import android.content.DialogInterface;
+@@ -46,12 +46,16 @@ public class PerformanceSettings extends SettingsPreferenceFragment implements
+     private static final String USE_16BPP_ALPHA_PROP = "persist.sys.use_16bpp_alpha";
+     private static final String HWA_SETTINGS_KEY = "hwa_settings";
+ 
++    private static final String FORCE_HIGHEND_GFX_PREF = "pref_force_highend_gfx";
++    private static final String FORCE_HIGHEND_GFX_PERSIST_PROP = "persist.sys.force_highendgfx";
++
+     private static final String DISABLE_BOOTANIMATION_PREF = "pref_disable_bootanimation";
+     private static final String DISABLE_BOOTANIMATION_PERSIST_PROP = "persist.sys.nobootanimation";
+ 
+     private ListPreference mPerfProfilePref;
+     private CheckBoxPreference mUse16bppAlphaPref;
+     private CheckBoxPreference mDisableBootanimPref;
++    private CheckBoxPreference mForceHighEndGfx;
+ 
+     private String[] mPerfProfileEntries;
+     private String[] mPerfProfileValues;
+@@ -105,6 +109,14 @@ public class PerformanceSettings extends SettingsPreferenceFragment implements
+         String use16bppAlpha = SystemProperties.get(USE_16BPP_ALPHA_PROP, "0");
+         mUse16bppAlphaPref.setChecked("1".equals(use16bppAlpha));
+ 
++	if (ActivityManager.isLowRamDeviceStatic()) {
++            mForceHighEndGfx = (CheckBoxPreference) prefSet.findPreference(FORCE_HIGHEND_GFX_PREF);
++            String forceHighendGfx = SystemProperties.get(FORCE_HIGHEND_GFX_PERSIST_PROP, "false");
++            mForceHighEndGfx.setChecked("true".equals(forceHighendGfx));
++        } else {
++            prefSet.removePreference(findPreference(FORCE_HIGHEND_GFX_PREF));
++        }
++
+ 	mDisableBootanimPref = (CheckBoxPreference) prefSet.findPreference(DISABLE_BOOTANIMATION_PREF);
+         String disableBootanimation = SystemProperties.get(DISABLE_BOOTANIMATION_PERSIST_PROP, "0");
+         mDisableBootanimPref.setChecked("1".equals(disableBootanimation));
+@@ -157,6 +169,9 @@ public class PerformanceSettings extends SettingsPreferenceFragment implements
+         if (preference == mUse16bppAlphaPref) {
+             SystemProperties.set(USE_16BPP_ALPHA_PROP,
+                     mUse16bppAlphaPref.isChecked() ? "1" : "0");
++	} else if (preference == mForceHighEndGfx) {
++            SystemProperties.set(FORCE_HIGHEND_GFX_PERSIST_PROP,
++                    mForceHighEndGfx.isChecked() ? "true" : "false");
+ 	} else if (preference == mDisableBootanimPref) {
+             SystemProperties.set(DISABLE_BOOTANIMATION_PERSIST_PROP,
+                     mDisableBootanimPref.isChecked() ? "1" : "0");
+-- 
+1.8.5.2
+
