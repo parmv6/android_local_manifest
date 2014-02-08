@@ -65,14 +65,14 @@ index 6603696..fab850a 100644
      <string name="power_menu_title">Power menu</string>
      <string name="power_menu_reboot_title">Reboot menu</string>
 diff --git a/res/xml/system_ui_settings.xml b/res/xml/system_ui_settings.xml
-index 33ed402..b26c44c 100644
+index 12e6197..b93aa31 100644
 --- a/res/xml/system_ui_settings.xml
 +++ b/res/xml/system_ui_settings.xml
 @@ -69,6 +69,15 @@
              android:fragment="com.android.settings.cyanogenmod.NavRing"
              android:title="@string/navigation_ring_title" />
  
-+        <ListPreference
++	<ListPreference
 +            android:key="nav_buttons_height"
 +            android:dialogTitle="@string/navigation_bar_height"
 +            android:title="@string/navigation_bar_height"
@@ -81,9 +81,9 @@ index 33ed402..b26c44c 100644
 +            android:defaultValue="48"
 +            android:persistent="false" />
 +
-     </PreferenceCategory>
- 
-     <com.android.settings.cyanogenmod.SystemSettingCheckBoxPreference
+         <com.android.settings.cyanogenmod.SystemSettingCheckBoxPreference
+             android:key="navigation_bar_left"
+             android:title="@string/navigation_bar_left_title"
 diff --git a/src/com/android/settings/cyanogenmod/SystemUiSettings.java b/src/com/android/settings/cyanogenmod/SystemUiSettings.java
 index b9cb4cf..9ffb36c 100644
 --- a/src/com/android/settings/cyanogenmod/SystemUiSettings.java
