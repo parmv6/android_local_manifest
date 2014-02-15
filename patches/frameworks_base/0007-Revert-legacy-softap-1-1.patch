@@ -4,7 +4,11 @@ Date: Sun, 2 Feb 2014 13:28:28 +0100
 Subject: [PATCH] Revert "Re-add legacy soft-ap for kitkat (1/2)"
 
 This reverts commit 3c21492d87c7a002f2191b1ae747fea08b169657.
-
+---
+ .../java/android/os/INetworkManagementService.aidl |  6 ++---
+ .../android/server/NetworkManagementService.java   | 22 +++++++++---------
+ wifi/java/android/net/wifi/WifiStateMachine.java   | 26 +++++++---------------
+ 3 files changed, 23 insertions(+), 31 deletions(-)
 
 diff --git a/core/java/android/os/INetworkManagementService.aidl b/core/java/android/os/INetworkManagementService.aidl
 index 7b82922..86f63b1 100644

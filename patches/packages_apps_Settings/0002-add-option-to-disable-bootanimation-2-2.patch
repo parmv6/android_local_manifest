@@ -26,37 +26,42 @@ index 9b38747..039e67a 100644
  
      <string name="increasing_ring_title">Ascending ringtone</string>
 diff --git a/res/xml/performance_settings.xml b/res/xml/performance_settings.xml
-index 379795e..32c742d 100644
+index caeb79c..d1b56cd 100644
 --- a/res/xml/performance_settings.xml
 +++ b/res/xml/performance_settings.xml
-@@ -45,4 +45,9 @@
-         android:title="@string/pref_use_16bpp_alpha_title"
+@@ -57,6 +57,11 @@
          android:summary="@string/pref_use_16bpp_alpha_summary" />
  
-+    <CheckBoxPreference
+     <CheckBoxPreference
 +        android:key="pref_disable_bootanimation"
 +        android:title="@string/pref_disable_bootanimation_title"
 +        android:summary="@string/pref_disable_bootanimation_summary" />
 +
- </PreferenceScreen>
++    <CheckBoxPreference
+         android:key="pref_force_highend_gfx"
+         android:title="@string/pref_force_highend_gfx_title"
+         android:summary="@string/pref_force_highend_gfx_summary" />
 diff --git a/src/com/android/settings/cyanogenmod/PerformanceSettings.java b/src/com/android/settings/cyanogenmod/PerformanceSettings.java
-index 4cbeb5e..674a059 100644
+index cd54a8d..bd4616b 100644
 --- a/src/com/android/settings/cyanogenmod/PerformanceSettings.java
 +++ b/src/com/android/settings/cyanogenmod/PerformanceSettings.java
-@@ -46,8 +46,12 @@ public class PerformanceSettings extends SettingsPreferenceFragment implements
+@@ -47,11 +47,15 @@ public class PerformanceSettings extends SettingsPreferenceFragment implements
      private static final String USE_16BPP_ALPHA_PROP = "persist.sys.use_16bpp_alpha";
      private static final String HWA_SETTINGS_KEY = "hwa_settings";
  
 +    private static final String DISABLE_BOOTANIMATION_PREF = "pref_disable_bootanimation";
 +    private static final String DISABLE_BOOTANIMATION_PERSIST_PROP = "persist.sys.nobootanimation";
 +
+     private static final String FORCE_HIGHEND_GFX_PREF = "pref_force_highend_gfx";
+     private static final String FORCE_HIGHEND_GFX_PERSIST_PROP = "persist.sys.force_highendgfx";
+ 
      private ListPreference mPerfProfilePref;
      private CheckBoxPreference mUse16bppAlphaPref;
 +    private CheckBoxPreference mDisableBootanimPref;
+     private CheckBoxPreference mForceHighEndGfx;
  
      private String[] mPerfProfileEntries;
-     private String[] mPerfProfileValues;
-@@ -101,6 +105,10 @@ public class PerformanceSettings extends SettingsPreferenceFragment implements
+@@ -106,6 +110,10 @@ public class PerformanceSettings extends SettingsPreferenceFragment implements
          String use16bppAlpha = SystemProperties.get(USE_16BPP_ALPHA_PROP, "0");
          mUse16bppAlphaPref.setChecked("1".equals(use16bppAlpha));
  
@@ -64,19 +69,19 @@ index 4cbeb5e..674a059 100644
 +        String disableBootanimation = SystemProperties.get(DISABLE_BOOTANIMATION_PERSIST_PROP, "0");
 +        mDisableBootanimPref.setChecked("1".equals(disableBootanimation));
 +
-         if (!isPackageInstalled("com.cyanogenmod.settings.device.hwa")) {
+         if (!isPackageInstalled("com.cyanogenmod.settings.device.hwa"))
              prefSet.removePreference(findPreference(HWA_SETTINGS_KEY));
-         }
-@@ -149,6 +157,9 @@ public class PerformanceSettings extends SettingsPreferenceFragment implements
+ 
+@@ -157,6 +165,9 @@ public class PerformanceSettings extends SettingsPreferenceFragment implements
          if (preference == mUse16bppAlphaPref) {
              SystemProperties.set(USE_16BPP_ALPHA_PROP,
                      mUse16bppAlphaPref.isChecked() ? "1" : "0");
 +	} else if (preference == mDisableBootanimPref) {
 +            SystemProperties.set(DISABLE_BOOTANIMATION_PERSIST_PROP,
 +                    mDisableBootanimPref.isChecked() ? "1" : "0");
-         } else {
-             // If we didn't handle it, let preferences handle it.
-             return super.onPreferenceTreeClick(preferenceScreen, preference);
+         } else if (preference == mForceHighEndGfx) {
+             SystemProperties.set(FORCE_HIGHEND_GFX_PERSIST_PROP,
+                     mForceHighEndGfx.isChecked() ? "true" : "false");
 -- 
 1.7.9.5
 

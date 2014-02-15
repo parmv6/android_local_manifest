@@ -85,27 +85,28 @@ index 12e6197..b93aa31 100644
              android:key="navigation_bar_left"
              android:title="@string/navigation_bar_left_title"
 diff --git a/src/com/android/settings/cyanogenmod/SystemUiSettings.java b/src/com/android/settings/cyanogenmod/SystemUiSettings.java
-index b9cb4cf..9ffb36c 100644
+index 4c3a725..ac77580 100644
 --- a/src/com/android/settings/cyanogenmod/SystemUiSettings.java
 +++ b/src/com/android/settings/cyanogenmod/SystemUiSettings.java
-@@ -39,10 +39,12 @@ public class SystemUiSettings extends SettingsPreferenceFragment  implements
+@@ -40,11 +40,13 @@ public class SystemUiSettings extends SettingsPreferenceFragment  implements
      private static final String KEY_EXPANDED_DESKTOP = "expanded_desktop";
      private static final String KEY_EXPANDED_DESKTOP_NO_NAVBAR = "expanded_desktop_no_navbar";
      private static final String CATEGORY_NAVBAR = "navigation_bar";
 +    private static final String KEY_NAVIGATION_HEIGHT = "nav_buttons_height";
      private static final String KEY_SCREEN_GESTURE_SETTINGS = "touch_screen_gesture_settings";
+     private static final String KEY_NAVIGATION_BAR_LEFT = "navigation_bar_left";
  
      private ListPreference mExpandedDesktopPref;
      private CheckBoxPreference mExpandedDesktopNoNavbarPref;
 +    private ListPreference mNavButtonsHeight;
+     private CheckBoxPreference mNavigationBarLeftPref;
  
      @Override
-     public void onCreate(Bundle savedInstanceState) {
-@@ -62,6 +64,17 @@ public class SystemUiSettings extends SettingsPreferenceFragment  implements
+@@ -68,6 +70,18 @@ public class SystemUiSettings extends SettingsPreferenceFragment  implements
          int expandedDesktopValue = Settings.System.getInt(getContentResolver(),
                  Settings.System.EXPANDED_DESKTOP_STYLE, 0);
  
-+        // Navbar height
++	// Navbar height
 +        mNavButtonsHeight = (ListPreference) findPreference(KEY_NAVIGATION_HEIGHT);
 +        if (mNavButtonsHeight != null) {
 +            mNavButtonsHeight.setOnPreferenceChangeListener(this);
@@ -116,14 +117,15 @@ index b9cb4cf..9ffb36c 100644
 +            mNavButtonsHeight.setSummary(mNavButtonsHeight.getEntry());
 +        }
 +
++
          try {
              boolean hasNavBar = WindowManagerGlobal.getWindowManagerService().hasNavigationBar();
  
-@@ -92,6 +105,13 @@ public class SystemUiSettings extends SettingsPreferenceFragment  implements
+@@ -104,6 +118,13 @@ public class SystemUiSettings extends SettingsPreferenceFragment  implements
              boolean value = (Boolean) objValue;
              updateExpandedDesktop(value ? 2 : 0);
              return true;
-+        } else if (preference == mNavButtonsHeight) {
++	} else if (preference == mNavButtonsHeight) {
 +            int statusNavButtonsHeight = Integer.valueOf((String) objValue);
 +            int index = mNavButtonsHeight.findIndexOfValue((String) objValue);
 +            Settings.System.putInt(getContentResolver(),
