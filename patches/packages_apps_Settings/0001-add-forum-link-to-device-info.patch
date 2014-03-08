@@ -41,7 +41,7 @@ index 51a6e2a..238d5ff 100644
 +
  </PreferenceScreen>
 diff --git a/src/com/android/settings/DeviceInfoSettings.java b/src/com/android/settings/DeviceInfoSettings.java
-index f7c6dc9..9672947 100644
+index 34469f3..e05412e 100644
 --- a/src/com/android/settings/DeviceInfoSettings.java
 +++ b/src/com/android/settings/DeviceInfoSettings.java
 @@ -20,6 +20,7 @@ import android.app.Activity;
@@ -57,15 +57,15 @@ index f7c6dc9..9672947 100644
  import android.preference.PreferenceGroup;
  import android.preference.PreferenceScreen;
 +import android.preference.Preference.OnPreferenceClickListener;
+ import android.telephony.MSimTelephonyManager;
  import android.util.Log;
  import android.widget.Toast;
- 
-@@ -190,6 +192,16 @@ public class DeviceInfoSettings extends RestrictedSettingsFragment {
+@@ -173,6 +175,16 @@ public class DeviceInfoSettings extends RestrictedSettingsFragment {
          // Remove regulatory information if not enabled.
          removePreferenceIfBoolFalse(KEY_REGULATORY_INFO,
                  R.bool.config_show_regulatory_info);
 +
-+        findPreference("konsta_web").setOnPreferenceClickListener(
++	findPreference("konsta_web").setOnPreferenceClickListener(
 +            new OnPreferenceClickListener() {
 +                public boolean onPreferenceClick(Preference preference) {
 +                    Intent browserIntent = new Intent("android.intent.action.VIEW",
