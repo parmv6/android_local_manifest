@@ -1,24 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <manifest>
-    <!-- Remove projects -->
-    <remove-project name="androidarmv6/android_build" />
-    <remove-project name="androidarmv6/android_vendor_cm" />
-    <remove-project name="androidarmv6/android_system_core" />
-    <remove-project name="platform/prebuilts/misc" path="prebuilts/misc" />
-
-    <!-- legaCyMod -->
-    <project path="system/core" name="legaCyMod/android_system_core" remote="github" revision="cm-11.0" />
-    <project path="build" name="legaCyMod/android_build" remote="github" revision="cm-11.0" />
-    <project path="vendor/cm" name="legaCyMod/android_vendor_cm" remote="github" revision="cm-11.0" />
-    <project path="packages/apps/Effem" name="legaCyMod/android_packages_apps_Effem" remote="github" revision="master" />
-    
     <!-- ZTE Blade -->
     <project path="device/zte/blade" name="zeelog/android_device_zte_blade" remote="github" revision="cm-11.0" />
     <project path="kernel/zte/zte-kernel-msm7x27" name="zeelog/zte-kernel-msm7x27" remote="github" revision="cm-11.0" />
-    <project path="vendor/zte" name="zeelog/proprietary_vendor_zte" remote="github" revision="cm-11.0" />
-    
+    <project path="vendor/zte" name="zeelog/proprietary_vendor_zte" remote="github" revision="cm-11.0" />    
     <!-- Local projects -->
     <project path="hardware/atheros/wifi/libs" name="androidarmv6/android_hardware_atheros_wifi_libs" remote="github" revision="cm-11.0" />
-    <project path="prebuilt/linux-x86/toolchain/arm-eabi-4.8" name="Mustaavalkosta/android_prebuilts_gcc_linux-x86_arm_arm-eabi-4.8" revision="master" />
+    <project path="packages/apps/Effem" name="legaCyMod/android_packages_apps_Effem" remote="github" revision="master" />
     <project path="prebuilts/misc" name="Mustaavalkosta/android_prebuilts_misc" revision="cm-11.0" />
 </manifest>
