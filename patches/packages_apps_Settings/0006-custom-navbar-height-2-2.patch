@@ -85,7 +85,7 @@ index 12e6197..b93aa31 100644
              android:key="navigation_bar_left"
              android:title="@string/navigation_bar_left_title"
 diff --git a/src/com/android/settings/cyanogenmod/SystemUiSettings.java b/src/com/android/settings/cyanogenmod/SystemUiSettings.java
-index ea82732..6547c99 100644
+index d6bd368..f5281ba 100644
 --- a/src/com/android/settings/cyanogenmod/SystemUiSettings.java
 +++ b/src/com/android/settings/cyanogenmod/SystemUiSettings.java
 @@ -41,11 +41,13 @@ public class SystemUiSettings extends SettingsPreferenceFragment  implements
@@ -118,13 +118,13 @@ index ea82732..6547c99 100644
 +        }
 +
          try {
-             boolean hasNavBar = WindowManagerGlobal.getWindowManagerService().hasNavigationBar();
- 
-@@ -107,6 +120,13 @@ public class SystemUiSettings extends SettingsPreferenceFragment  implements
+             // Only show the navigation bar category on devices that has a navigation bar
+             // unless we are forcing it via development settings
+@@ -112,6 +125,13 @@ public class SystemUiSettings extends SettingsPreferenceFragment  implements
              boolean value = (Boolean) objValue;
              updateExpandedDesktop(value ? 2 : 0);
              return true;
-+    } else if (preference == mNavButtonsHeight) {
++	} else if (preference == mNavButtonsHeight) {
 +            int statusNavButtonsHeight = Integer.valueOf((String) objValue);
 +            int index = mNavButtonsHeight.findIndexOfValue((String) objValue);
 +            Settings.System.putInt(getContentResolver(),

@@ -1,49 +1,56 @@
-From b5268745e427cbe650ba9da2e6bea2d80d3d7021 Mon Sep 17 00:00:00 2001
+From 46e47dbe4ab765e14e030318ffd060b264c48a46 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Lasse=20Brudeskar=20Vik=C3=A5s?= <bvx89.at.cs@gmail.com>
 Date: Sun, 19 Jan 2014 22:01:57 +0100
 Subject: [PATCH] Add Download Speeds in notification
 
-This commit adds the ability to show the current total download
-speed in the expanded mode. This is applicable to both single
-and multi file downloads.
+This commit adds the ability to show the current total download speed
 
 Screenshots:
-Multi  - http://i.imgur.com/3t7yAy7.png
-Single - http://i.imgur.com/MMqmA22.png
-
-from slim rom
+https://lh6.googleusercontent.com/HXWqdF2_XSDJaAkoYo9D7RhcvRZGhxjqIIKHR777L3k=w341-h568-no
 
 Change-Id: I801dbe61c7ee59d0c1d14d5851ad6dc3a7678499
 ---
- res/values/cm_strings.xml                          |  3 ++
- .../providers/downloads/DownloadNotifier.java      | 35 ++++++++++++++++++----
- 2 files changed, 33 insertions(+), 5 deletions(-)
+ .../providers/downloads/DownloadNotifier.java      | 57 ++++++++++++++++++++--
+ 1 file changed, 52 insertions(+), 5 deletions(-)
 
-diff --git a/res/values/cm_strings.xml b/res/values/cm_strings.xml
-index e9409a9..d3e138e 100644
---- a/res/values/cm_strings.xml
-+++ b/res/values/cm_strings.xml
-@@ -17,4 +17,7 @@
- <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-     <string name="live_folder_drawer_label">Downloads folder</string>
-     <string name="live_folder_label">Downloads</string>
-+
-+    <!-- Transfer speed for current download/s. -->
-+    <string name="download_speed"><xliff:g id="duration">%s</xliff:g>/s</string>
- </resources>
 diff --git a/src/com/android/providers/downloads/DownloadNotifier.java b/src/com/android/providers/downloads/DownloadNotifier.java
-index ac52eba..6c3c90a 100644
+index ac52eba..e22acdb 100644
 --- a/src/com/android/providers/downloads/DownloadNotifier.java
 +++ b/src/com/android/providers/downloads/DownloadNotifier.java
-@@ -35,6 +35,7 @@ import android.os.SystemClock;
- import android.provider.Downloads;
- import android.text.TextUtils;
- import android.text.format.DateUtils;
-+import android.text.format.Formatter;
- import android.util.Log;
- import android.util.LongSparseLongArray;
+@@ -42,6 +42,7 @@ import com.google.common.collect.ArrayListMultimap;
+ import com.google.common.collect.Maps;
+ import com.google.common.collect.Multimap;
  
-@@ -202,6 +203,7 @@ public class DownloadNotifier {
++import java.text.DecimalFormat;
+ import java.util.Collection;
+ import java.util.HashMap;
+ import java.util.Iterator;
+@@ -59,6 +60,10 @@ public class DownloadNotifier {
+     private static final int TYPE_WAITING = 2;
+     private static final int TYPE_COMPLETE = 3;
+ 
++    private static final int SPEED_KB = 1024;
++    private static final int SPEED_MB = 1048576;
++    private static final int SPEED_GB = 1073741824;
++
+     private final Context mContext;
+     private final NotificationManager mNotifManager;
+ 
+@@ -85,6 +90,13 @@ public class DownloadNotifier {
+     @GuardedBy("mDownloadSpeed")
+     private final LongSparseLongArray mDownloadTouch = new LongSparseLongArray();
+ 
++    /**
++     * Formatter for giving transfer speeds with maximum of one decimal places
++     */
++    private static final DecimalFormat mFormatter = new DecimalFormat("#.#");
++
++    private static final String SPEED_PLACEHOLDER = "%s %cB/s";
++
+     public DownloadNotifier(Context context) {
+         mContext = context;
+         mNotifManager = (NotificationManager) context.getSystemService(
+@@ -202,6 +214,7 @@ public class DownloadNotifier {
              // Calculate and show progress
              String remainingText = null;
              String percentText = null;
@@ -51,81 +58,81 @@ index ac52eba..6c3c90a 100644
              if (type == TYPE_ACTIVE) {
                  long current = 0;
                  long total = 0;
-@@ -221,6 +223,10 @@ public class DownloadNotifier {
+@@ -221,6 +234,30 @@ public class DownloadNotifier {
                      percentText = res.getString(R.string.download_percent, percent);
  
                      if (speed > 0) {
-+                        // use Formatter interface for determining speed unit
-+                        speedText = res.getString(R.string.download_speed,
-+                                Formatter.formatFileSize(mContext, speed));
++                        // Decide prefix character for speed string
++                        char preFix;
++                        double speedNormalized = speed;
++
++                        if (speed < SPEED_KB) {
++                            preFix = '\0';
++                        } else if (speed < SPEED_MB) {
++                            preFix = 'K';
++                            speedNormalized /= SPEED_KB;
++                        } else if (speed < SPEED_GB) {
++                            preFix = 'M';
++                            speedNormalized /= SPEED_MB;
++                        } else {
++                            preFix = 'G';
++                            speedNormalized /= SPEED_GB;
++                        }
++
++                        // Format the String
++                        speedText = String.format(
++                            SPEED_PLACEHOLDER,
++                            mFormatter.format(speedNormalized).toString(),
++                            preFix
++                        );
 +
                          final long remainingMillis = ((total - current) * 1000) / speed;
                          remainingText = res.getString(R.string.download_remaining,
                                  DateUtils.formatDuration(remainingMillis));
-@@ -235,16 +241,25 @@ public class DownloadNotifier {
+@@ -235,17 +272,23 @@ public class DownloadNotifier {
              // Build titles and description
              final Notification notif;
              if (cluster.size() == 1) {
-+                final Notification.InboxStyle inboxStyle = new Notification.InboxStyle(builder);
++
                  final DownloadInfo info = cluster.iterator().next();
  
                  builder.setContentTitle(getDownloadTitle(res, info));
-+                builder.setContentText(remainingText);
  
++                String contentText = null;
++
                  if (type == TYPE_ACTIVE) {
                      if (!TextUtils.isEmpty(info.mDescription)) {
--                        builder.setContentText(info.mDescription);
-+                        inboxStyle.addLine(info.mDescription);
-+                    } else {
-+                        inboxStyle.addLine(res.getString(R.string.download_running));
+                         builder.setContentText(info.mDescription);
 +                    }
 +
-+                    if (TextUtils.isEmpty(speedText)) {
-+                        inboxStyle.setSummaryText(remainingText);
++                    if (speedText != null) {
++                        builder.setContentInfo(speedText + ", " + remainingText + ", " + percentText);
                      } else {
 -                        builder.setContentText(remainingText);
-+                        inboxStyle.setSummaryText(speedText + ", " + remainingText);
++                        builder.setContentInfo(percentText);
                      }
-+
-                     builder.setContentInfo(percentText);
+-                    builder.setContentInfo(percentText);
  
                  } else if (type == TYPE_WAITING) {
-@@ -253,14 +268,19 @@ public class DownloadNotifier {
+                     builder.setContentText(
+@@ -253,10 +296,14 @@ public class DownloadNotifier {
  
                  } else if (type == TYPE_COMPLETE) {
                      if (Downloads.Impl.isStatusError(info.mStatus)) {
 -                        builder.setContentText(res.getText(R.string.notification_download_failed));
-+                        builder.setContentText(
-+                                res.getText(R.string.notification_download_failed));
-+                        inboxStyle.setSummaryText(
-+                                res.getText(R.string.notification_download_failed));
++                        
++                        contentText = res.getString(R.string.notification_download_failed);
++
++                        builder.setContentText(contentText);
                      } else if (Downloads.Impl.isStatusSuccess(info.mStatus)) {
-                         builder.setContentText(
-                                 res.getText(R.string.notification_download_complete));
-+                        inboxStyle.setSummaryText(
-+                                res.getText(R.string.notification_download_complete));
+-                        builder.setContentText(
+-                                res.getText(R.string.notification_download_complete));
++                        contentText = res.getString(R.string.notification_download_complete);
++
++                        builder.setContentText(contentText);
                      }
                  }
  
--                notif = builder.build();
-+                notif = inboxStyle.build();
- 
-             } else {
-                 final Notification.InboxStyle inboxStyle = new Notification.InboxStyle(builder);
-@@ -274,7 +294,12 @@ public class DownloadNotifier {
-                             R.plurals.notif_summary_active, cluster.size(), cluster.size()));
-                     builder.setContentText(remainingText);
-                     builder.setContentInfo(percentText);
--                    inboxStyle.setSummaryText(remainingText);
-+
-+                    if (TextUtils.isEmpty(speedText)) {
-+                        inboxStyle.setSummaryText(remainingText);
-+                    } else {
-+                        inboxStyle.setSummaryText(speedText + ", " + remainingText);
-+                    }
- 
-                 } else if (type == TYPE_WAITING) {
-                     builder.setContentTitle(res.getQuantityString(
 -- 
 1.9.0
 

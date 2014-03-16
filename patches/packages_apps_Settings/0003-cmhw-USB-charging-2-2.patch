@@ -47,17 +47,17 @@ index fbf28d3..40858d9 100644
 +
  </PreferenceScreen>
 diff --git a/src/com/android/settings/cyanogenmod/BootReceiver.java b/src/com/android/settings/cyanogenmod/BootReceiver.java
-index a7392c2..f5c2294 100644
+index 85d9b5e..be0aa73 100644
 --- a/src/com/android/settings/cyanogenmod/BootReceiver.java
 +++ b/src/com/android/settings/cyanogenmod/BootReceiver.java
-@@ -77,6 +77,7 @@ public class BootReceiver extends BroadcastReceiver {
+@@ -78,6 +78,7 @@ public class BootReceiver extends BroadcastReceiver {
          VibratorIntensity.restore(ctx);
          DisplaySettings.restore(ctx);
          LocationSettings.restore(ctx);
-+        MoreDeviceSettings.restore(ctx);
++	MoreDeviceSettings.restore(ctx);
+         ButtonSettings.restoreKeyDisabler(ctx);
      }
- 
-     private void initFreqCapFiles(Context ctx)
+
 diff --git a/src/com/android/settings/cyanogenmod/MoreDeviceSettings.java b/src/com/android/settings/cyanogenmod/MoreDeviceSettings.java
 index 4ad9b04..252569e 100644
 --- a/src/com/android/settings/cyanogenmod/MoreDeviceSettings.java
