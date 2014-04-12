@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <manifest>
-    <!-- Removals -->
-    <remove-project name="androidarmv6/android_build" />
-    <remove-project name="androidarmv6/android_vendor_cm" />
     <!-- ZTE Blade -->
-    <project path="device/zte/blade" name="zeelog/android_device_zte_blade" remote="github" revision="cm-11.0" />
+    <remove-project name="omniarmv6/platform_system_netd" />
+    <remove-project name="omniarmv6/android_device_qcom_msm7x27" />
+    <project path="parmv6" name="parmv6/android_local_manifest" remote="github" revision="omni-4.4" />
+    <project path="device/zte/blade" name="zeelog/android_device_zte_blade" remote="github" revision="omni-4.4" />
     <project path="kernel/zte/zte-kernel-msm7x27" name="zeelog/zte-kernel-msm7x27" remote="github" revision="cm-11.0" />
-    <project path="vendor/zte" name="zeelog/proprietary_vendor_zte" remote="github" revision="cm-11.0" />    
-    <!-- Local projects -->
-    <project path="build" name="parmv6/android_build" remote="github" revision="cm-11.0" />
-    <project path="vendor/cm" name="parmv6/android_vendor_cm" remote="github" revision="cm-11.0" />
-    <project path="hardware/atheros/wifi/libs" name="androidarmv6/android_hardware_atheros_wifi_libs" remote="github" revision="cm-11.0" />
+    <project path="vendor/zte" name="zeelog/proprietary_vendor_zte" remote="github" revision="cm-11.0" />
+    <!-- FM Radio -->
     <project path="packages/apps/Effem" name="legaCyMod/android_packages_apps_Effem" remote="github" revision="master" />
+    <!-- Local projects -->
+    <project path="hardware/atheros/wifi/libs" name="androidarmv6/android_hardware_atheros_wifi_libs" remote="github" revision="cm-11.0" />
+    <project path="system/netd" name="androidarmv6/android_system_netd" remote="github" revision="cm-11.0" />
+    <project path="hardware/atheros/ar6000_sdk2" name="plaguedbypenguins/atheros_sdk2" remote="github" revision="master" />
 </manifest>
