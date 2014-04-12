@@ -51,15 +51,15 @@ index b34676b..4b5a534 100644
 +        ALOGE("softap <wlan iface> <SSID> <hidden/broadcast> <channel> <wpa2?-psk|open> <passphrase>");
 +        return ResponseCode::CommandSyntaxError;
 +    }
-+    
++
 +    if (strcmp("athap0", argv[2])) {
 +        ALOGW("Softap set 2nd arg is not athap0. forcing");
 +    }
- 
+
 -    ALOGD("setSoftap()");
 +    if (!strcasecmp(argv[4], "hidden"))
 +        hidden = 1;
- 
+
 -    if (argc < 4) {
 -        ALOGE("Softap set - missing arguments");
 -        return ResponseCode::CommandSyntaxError;
@@ -68,13 +68,13 @@ index b34676b..4b5a534 100644
 +        if (channel <= 0)
 +            channel = AP_CHANNEL_DEFAULT;
      }
-+    
++
 +    asprintf(&wbuf, "interface=%s\nctrl_interface="
 +            "/data/misc/wifi/hostapd\nssid=%s\nchannel_num=%d\n"
 +            "auth_algs=1\nmax_num_sta=%d\nbeacon_int=%d\ndtim_period=%d\n",
 +            "athap0", argv[3], channel,
 +            WIFI_DEFAULT_MAX_STA, WIFI_DEFAULT_BI, WIFI_DEFAULT_DTIM);
- 
+
 -    fd = open(HOSTAPD_CONFIG_FILE, O_CREAT|O_WRONLY|O_TRUNC, 0660);
 +    if (argc > 7) {
 +        if (!strcmp(argv[6], "wpa2-psk")) {
@@ -104,7 +104,7 @@ index b34676b..4b5a534 100644
 +    }
 +    free(wbuf);
 +    free(fbuf);
- 
+
 -    len = snprintf(buf, sizeof(buf), "interface=athap0\n");
 -    write(fd, buf, len);
 -    len = snprintf(buf, sizeof(buf), "ctrl_interface=%s\n",IFACE_DIR);
@@ -154,7 +154,7 @@ index b34676b..4b5a534 100644
 -    } else {
 -        len = snprintf(buf, sizeof(buf), "channel_num=%d\n",WIFI_DEFAULT_CHANNEL);
 -        write(fd, buf, len);
-+    
++
 +    if (fchown(fd, AID_SYSTEM, AID_WIFI) < 0) {
 +        ALOGE("Error changing group ownership of %s to %d: %s",
 +                HOSTAPD_CONFIG_FILE, AID_WIFI, strerror(errno));
@@ -171,7 +171,7 @@ index b34676b..4b5a534 100644
 -    }*/
 -    mProfileValid = 1;
 -
-+    
++
      close(fd);
- 
+
      ret = wifi_load_profile(isSoftapStarted());
