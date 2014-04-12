@@ -11,7 +11,7 @@ Change-Id: Ia1c29e89318ced977c5b1881bfd5b62253128f6b
  3 files changed, 20 insertions(+)
 
 diff --git a/res/values/cm_strings.xml b/res/values/cm_strings.xml
-index 9b38747..039e67a 100644
+index 43dbbec..6bd4e2d 100644
 --- a/res/values/cm_strings.xml
 +++ b/res/values/cm_strings.xml
 @@ -31,6 +31,10 @@
@@ -22,9 +22,9 @@ index 9b38747..039e67a 100644
 +    <string name="pref_disable_bootanimation_title">Disable boot animation</string>
 +    <string name="pref_disable_bootanimation_summary">Don\'t show boot animation for faster boot</string>
 +
-     <string name="lock_screen_title">Lock screen</string>
- 
-     <string name="increasing_ring_title">Ascending ringtone</string>
+     <!--  Title for PreferenceScreen to change encryption password [CHAR LIMIT=22]  -->
+     <string name="change_crypt_password_title">Change password</string>
+
 diff --git a/res/xml/performance_settings.xml b/res/xml/performance_settings.xml
 index caeb79c..d1b56cd 100644
 --- a/res/xml/performance_settings.xml
@@ -42,10 +42,10 @@ index caeb79c..d1b56cd 100644
          android:title="@string/pref_force_highend_gfx_title"
          android:summary="@string/pref_force_highend_gfx_summary" />
 diff --git a/src/com/android/settings/cyanogenmod/PerformanceSettings.java b/src/com/android/settings/cyanogenmod/PerformanceSettings.java
-index cd54a8d..bd4616b 100644
+index 62e2308..97ee2ca 100644
 --- a/src/com/android/settings/cyanogenmod/PerformanceSettings.java
 +++ b/src/com/android/settings/cyanogenmod/PerformanceSettings.java
-@@ -47,11 +47,15 @@ public class PerformanceSettings extends SettingsPreferenceFragment implements
+@@ -48,11 +48,15 @@ public class PerformanceSettings extends SettingsPreferenceFragment implements
      private static final String USE_16BPP_ALPHA_PROP = "persist.sys.use_16bpp_alpha";
      private static final String HWA_SETTINGS_KEY = "hwa_settings";
  
@@ -61,7 +61,7 @@ index cd54a8d..bd4616b 100644
      private CheckBoxPreference mForceHighEndGfx;
  
      private String[] mPerfProfileEntries;
-@@ -106,6 +110,10 @@ public class PerformanceSettings extends SettingsPreferenceFragment implements
+@@ -107,6 +111,10 @@ public class PerformanceSettings extends SettingsPreferenceFragment implements
          String use16bppAlpha = SystemProperties.get(USE_16BPP_ALPHA_PROP, "0");
          mUse16bppAlphaPref.setChecked("1".equals(use16bppAlpha));
  
@@ -69,10 +69,10 @@ index cd54a8d..bd4616b 100644
 +        String disableBootanimation = SystemProperties.get(DISABLE_BOOTANIMATION_PERSIST_PROP, "0");
 +        mDisableBootanimPref.setChecked("1".equals(disableBootanimation));
 +
-         if (!isPackageInstalled("com.cyanogenmod.settings.device.hwa"))
+         if (!Utils.isPackageInstalled(getActivity(), "com.cyanogenmod.settings.device.hwa"))
              prefSet.removePreference(findPreference(HWA_SETTINGS_KEY));
  
-@@ -157,6 +165,9 @@ public class PerformanceSettings extends SettingsPreferenceFragment implements
+@@ -158,6 +166,9 @@ public class PerformanceSettings extends SettingsPreferenceFragment implements
          if (preference == mUse16bppAlphaPref) {
              SystemProperties.set(USE_16BPP_ALPHA_PROP,
                      mUse16bppAlphaPref.isChecked() ? "1" : "0");
