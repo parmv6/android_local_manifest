@@ -1,8 +1,8 @@
-ZTE Blade CM-11.0 manifest
+ZTE Blade OmniROM manifest
 ==========================
 
 Credits ::
 KonstaT ::
 PlaguedByPenguins ::
 Androidarmv6 Team ::
-CyanogenMod Team ::
+OMNIROM Team ::
