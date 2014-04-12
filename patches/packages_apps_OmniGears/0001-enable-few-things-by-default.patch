@@ -1,0 +1,48 @@
+From c1b77432e1a5b2582d0e35faeccbf8dc3ed1c160 Mon Sep 17 00:00:00 2001
+From: zeelog <daniel.zammit@live.com>
+Date: Wed, 9 Apr 2014 18:00:40 +0200
+Subject: [PATCH] enable few things by default
+
+ideally these go in device overlay eventually...
+
+Change-Id: I64b1638c6e53b0453e236549d472679ae70dd2c2
+---
+ res/values/config.xml                                         | 4 ++--
+ src/org/omnirom/omnigears/interfacesettings/BarsSettings.java | 2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/res/values/config.xml b/res/values/config.xml
+index 07f9d3f..2a5ac02 100644
+--- a/res/values/config.xml
++++ b/res/values/config.xml
+@@ -22,12 +22,12 @@
+ 
+     <!-- Volume Rocker Wake Support. Some devices do not support (PMU) this.
+          Setting to false will disable Volume Rocker Wake support -->
+-    <bool name="config_show_volumeRockerWake">false</bool>
++    <bool name="config_show_volumeRockerWake">true</bool>
+ 
+     <!-- Volume rocker support. Some devices do not have a volume rocker. -->
+     <bool name="config_has_volume_rocker">true</bool>
+ 
+     <!-- Whether device has hardware buttons -->
+-    <bool name="config_has_hardware_buttons">false</bool>
++    <bool name="config_has_hardware_buttons">true</bool>
+ 
+ </resources>
+diff --git a/src/org/omnirom/omnigears/interfacesettings/BarsSettings.java b/src/org/omnirom/omnigears/interfacesettings/BarsSettings.java
+index 81a8f6d..a9aec22 100644
+--- a/src/org/omnirom/omnigears/interfacesettings/BarsSettings.java
++++ b/src/org/omnirom/omnigears/interfacesettings/BarsSettings.java
+@@ -174,7 +174,7 @@ public class BarsSettings extends SettingsPreferenceFragment implements
+         hasNavBar = hasNavBar || (SystemProperties.getInt("qemu.hw.mainkeys", 1) == 0);
+ 
+         // Hide navigation bar category on devices without navigation bar
+-        if (!hasNavBar) {
++        if (hasNavBar) {
+             prefSet.removePreference(findPreference(CATEGORY_NAVBAR));
+         } else {
+             mSoftBackKillApp = (CheckBoxPreference) prefSet.findPreference(SOFT_BACK_KILL_APP);
+-- 
+1.9.1
+

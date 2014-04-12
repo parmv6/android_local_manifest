@@ -1,0 +1,28 @@
+From 63b4aeac0d95c7a3c982656aa0b9fd3bf9ac21de Mon Sep 17 00:00:00 2001
+From: zeelog <daniel.zammit@live.com>
+Date: Sat, 22 Mar 2014 19:00:26 +0100
+Subject: [PATCH] disable adb authentication by default
+
+Change-Id: I4545086408aafe9c0912933306e98d5ee55eff75
+---
+ config/common.mk  |  9 +++++-
+ tools/opticharger | 21 +++----------
+ tools/squisher    | 91 +++++++++++++++++++++++++++++++++++++------------------
+ 3 files changed, 75 insertions(+), 46 deletions(-)
+
+diff --git a/config/common.mk b/config/common.mk
+index 5726d85..ac40fca 100644
+--- a/config/common.mk
++++ b/config/common.mk
+@@ -20,7 +23,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
+ 
+ # enable ADB authentication if not on eng build
+ ifneq ($(TARGET_BUILD_VARIANT),eng)
+-ADDITIONAL_DEFAULT_PROPERTIES += ro.adb.secure=1
++ADDITIONAL_DEFAULT_PROPERTIES += ro.adb.secure=0
+ endif
+ 
+ # Backup Tool
+-- 
+1.9.1
+

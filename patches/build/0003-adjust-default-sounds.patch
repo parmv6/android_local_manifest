@@ -1,0 +1,42 @@
+From cc6dc2e33f7b73a8a9bac2bc2e02e745c66b0b39 Mon Sep 17 00:00:00 2001
+From: zeelog <daniel.zammit@live.com>
+Date: Sat, 5 Apr 2014 21:06:32 +0200
+Subject: [PATCH] adjust default sounds
+
+Change-Id: I2500537934f3b5f44292e6cdd8d5dd4e23373412
+---
+ target/product/core_base.mk | 4 ++--
+ target/product/full_base.mk | 2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/target/product/core_base.mk b/target/product/core_base.mk
+index 603acad..c6eff15 100644
+--- a/target/product/core_base.mk
++++ b/target/product/core_base.mk
+@@ -17,8 +17,8 @@
+ # that should not be in PDK should be added in lower level like core.mk.
+ 
+ PRODUCT_PROPERTY_OVERRIDES := \
+-    ro.config.notification_sound=OnTheHunt.ogg \
+-    ro.config.alarm_alert=Alarm_Classic.ogg
++    ro.config.notification_sound=F1_New_SMS.ogg \
++    ro.config.alarm_alert=Alarm_Beep_01.ogg
+ 
+ PRODUCT_PACKAGES += \
+     ContactsProvider \
+diff --git a/target/product/full_base.mk b/target/product/full_base.mk
+index c7b0520..ebba9d6 100644
+--- a/target/product/full_base.mk
++++ b/target/product/full_base.mk
+@@ -43,7 +43,7 @@ PRODUCT_PACKAGES += \
+ PRODUCT_PROPERTY_OVERRIDES := \
+     ro.com.android.dateformat=MM-dd-yyyy \
+     ro.config.ringtone=Ring_Synth_04.ogg \
+-    ro.config.notification_sound=pixiedust.ogg
++    ro.config.notification_sound=F1_New_SMS.ogg
+ 
+ # Put en_US first in the list, so make it default.
+ PRODUCT_LOCALES := en_US
+-- 
+1.9.1
+
