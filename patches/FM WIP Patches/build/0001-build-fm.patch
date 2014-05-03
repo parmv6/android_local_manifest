@@ -1,0 +1,24 @@
+From 531c8323e18bc67908e9ce45bf6807c486cc1e39 Mon Sep 17 00:00:00 2001
+From: zeelog <daniel.zammit@live.com>
+Date: Sat, 19 Apr 2014 18:01:55 +0200
+Subject: [PATCH] Add support for FM Radio in Android
+
+---
+ core/pathmap.mk | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/core/pathmap.mk b/core/pathmap.mk
+index dc7a8d6..7702b3d 100644
+--- a/core/pathmap.mk
++++ b/core/pathmap.mk
+@@ -98,6 +98,7 @@ FRAMEWORKS_BASE_SUBDIRS := \
+ 	    telephony \
+ 	    wifi \
+ 	    keystore \
++	    fmradio \
+ 	 )
+ 
+ #
+-- 
+1.9.2
+

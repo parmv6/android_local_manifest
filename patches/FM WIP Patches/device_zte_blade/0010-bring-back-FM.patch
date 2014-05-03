@@ -1,0 +1,60 @@
+From 42e9e15408976b663b55a3b072f92cc3d386d51c Mon Sep 17 00:00:00 2001
+From: zeelog <daniel.zammit@live.com>
+Date: Sat, 19 Apr 2014 23:43:13 +0200
+Subject: [PATCH] bring back FM
+
+Change-Id: Idae7c6e8e744b3ac4bfdb4a12fd02bb044972441
+---
+ BoardConfig.mk | 6 +++---
+ blade.mk       | 9 ++++-----
+ 2 files changed, 7 insertions(+), 8 deletions(-)
+
+diff --git a/BoardConfig.mk b/BoardConfig.mk
+index 6c8fa73..6439950 100644
+--- a/BoardConfig.mk
++++ b/BoardConfig.mk
+@@ -122,9 +122,9 @@ COMMON_GLOBAL_CFLAGS += -DICS_CAMERA_BLOB -DZTE_CAMERA_HARDWARE
+ TARGET_ARCH_LOWMEM := true
+ 
+ # FM Radio
+-#BOARD_USES_STE_FMRADIO := true
+-#BOARD_HAVE_QCOM_FM := true
+-#COMMON_GLOBAL_CFLAGS += -DSTE_FM -DQCOM_FM_ENABLED
++BOARD_USES_STE_FMRADIO := true
++BOARD_HAVE_QCOM_FM := true
++COMMON_GLOBAL_CFLAGS += -DSTE_FM -DQCOM_FM_ENABLED
+ 
+ ## OTA script extras file (build/tools/releasetools)
+ TARGET_OTA_EXTRAS_FILE := device/zte/blade/releasetools-extras.txt
+diff --git a/blade.mk b/blade.mk
+index 3202f59..c1c78eb 100644
+--- a/blade.mk
++++ b/blade.mk
+@@ -22,9 +22,9 @@ PRODUCT_PACKAGES += \
+     camera.msm7x27
+ 
+ # FM Radio
+-#PRODUCT_PACKAGES += \
+-#    Effem \
+-#    libfmradio.si4708
++PRODUCT_PACKAGES += \
++    Effem \
++    libfmradio.si4708
+ 
+ # GPS
+ PRODUCT_PACKAGES += \
+@@ -89,10 +89,9 @@ PRODUCT_COPY_FILES += \
+     frameworks/native/data/etc/android.hardware.touchscreen.multitouch.distinct.xml:system/etc/permissions/android.hardware.touchscreen.multitouch.distinct.xml \
+     frameworks/native/data/etc/android.hardware.wifi.xml:system/etc/permissions/android.hardware.wifi.xml \
+     frameworks/native/data/etc/android.software.sip.voip.xml:system/etc/permissions/android.software.sip.voip.xml \
++    frameworks/native/data/etc/com.stericsson.hardware.fm.receiver.xml:system/etc/permissions/com.stericsson.hardware.fm.receiver.xml \
+     frameworks/native/data/etc/handheld_core_hardware.xml:system/etc/permissions/handheld_core_hardware.xml
+ 
+-#frameworks/native/data/etc/com.stericsson.hardware.fm.receiver.xml:system/etc/permissions/com.stericsson.hardware.fm.receiver.xml \
+-
+ # Enable repeatable keys in CWM
+ PRODUCT_PROPERTY_OVERRIDES += \
+     ro.cwm.enable_key_repeat=true
+-- 
+1.9.2
+

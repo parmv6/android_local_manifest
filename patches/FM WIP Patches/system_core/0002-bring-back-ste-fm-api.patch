@@ -1,0 +1,77 @@
+From 0c0df10799754d21d3f75c3e7863bb63c8e3972a Mon Sep 17 00:00:00 2001
+From: zeelog <daniel.zammit@live.com>
+Date: Sat, 19 Apr 2014 17:44:24 +0200
+Subject: [PATCH] bring back ste-fm based FM API
+
+Change-Id: Ie651a530f28fe3736e0eae491713ad0e2d89dd7f
+---
+ include/system/audio.h | 15 ++++++++++-----
+ 1 file changed, 10 insertions(+), 5 deletions(-)
+
+diff --git a/include/system/audio.h b/include/system/audio.h
+index a953536..568ee95 100644
+--- a/include/system/audio.h
++++ b/include/system/audio.h
+@@ -56,8 +56,11 @@ typedef enum {
+     AUDIO_STREAM_ENFORCED_AUDIBLE = 7, /* Sounds that cannot be muted by user and must be routed to speaker */
+     AUDIO_STREAM_DTMF             = 8,
+     AUDIO_STREAM_TTS              = 9,
++#ifdef QCOM_FM_ENABLED
++    AUDIO_STREAM_FM               = 10,
++#endif
+ #ifdef QCOM_HARDWARE
+-    AUDIO_STREAM_INCALL_MUSIC     = 10,
++    AUDIO_STREAM_INCALL_MUSIC     = 11,
+ #endif
+ 
+     AUDIO_STREAM_CNT,
+@@ -80,8 +83,10 @@ typedef enum {
+                                           /* An example of remote presentation is Wifi Display */
+                                           /*  where a dongle attached to a TV can be used to   */
+                                           /*  play the mix captured by this audio source.      */
++#if defined(QCOM_FM_ENABLED) || defined(STE_FM)
+     AUDIO_SOURCE_FM_RX               = 9,
+     AUDIO_SOURCE_FM_RX_A2DP          = 10,
++#endif
+     AUDIO_SOURCE_CNT,
+     AUDIO_SOURCE_MAX                 = AUDIO_SOURCE_CNT - 1,
+     AUDIO_SOURCE_HOTWORD             = 1999, /* A low-priority, preemptible audio source for
+@@ -422,7 +427,7 @@ enum {
+     AUDIO_DEVICE_OUT_ANC_HEADSET               = 0x10000,
+     AUDIO_DEVICE_OUT_ANC_HEADPHONE             = 0x20000,
+     AUDIO_DEVICE_OUT_PROXY                     = 0x40000,
+-#ifdef QCOM_HARDWARE
++#ifdef QCOM_HARDWARE || defined(STE_FM)
+     AUDIO_DEVICE_OUT_FM                        = 0x80000,
+     AUDIO_DEVICE_OUT_FM_TX                     = 0x100000,
+     AUDIO_DEVICE_OUT_SPDIF                     = 0x200000,
+@@ -447,7 +452,7 @@ enum {
+                                  AUDIO_DEVICE_OUT_ANC_HEADSET |
+                                  AUDIO_DEVICE_OUT_ANC_HEADPHONE |
+                                  AUDIO_DEVICE_OUT_PROXY |
+-#ifdef QCOM_HARDWARE
++#ifdef QCOM_HARDWARE || defined(STE_FM)
+                                  AUDIO_DEVICE_OUT_FM |
+                                  AUDIO_DEVICE_OUT_FM_TX |
+                                  AUDIO_DEVICE_OUT_SPDIF |
+@@ -496,7 +501,7 @@ enum {
+     AUDIO_DEVICE_IN_USB_DEVICE            = AUDIO_DEVICE_BIT_IN | 0x1000,
+     AUDIO_DEVICE_IN_ANC_HEADSET           = AUDIO_DEVICE_BIT_IN | 0x2000,
+     AUDIO_DEVICE_IN_PROXY                 = AUDIO_DEVICE_BIT_IN | 0x4000,
+-#ifdef QCOM_HARDWARE
++#ifdef QCOM_HARDWARE || defined(STE_FM)
+     AUDIO_DEVICE_IN_FM_RX                 = AUDIO_DEVICE_BIT_IN | 0x8000,
+     AUDIO_DEVICE_IN_FM_RX_A2DP            = AUDIO_DEVICE_BIT_IN | 0x10000,
+ #endif
+@@ -518,7 +523,7 @@ enum {
+                                AUDIO_DEVICE_IN_USB_DEVICE |
+                                AUDIO_DEVICE_IN_PROXY |
+                                AUDIO_DEVICE_IN_ANC_HEADSET |
+-#ifdef QCOM_HARDWARE
++#ifdef QCOM_HARDWARE || defined(STE_FM)
+                                AUDIO_DEVICE_IN_FM_RX |
+                                AUDIO_DEVICE_IN_FM_RX_A2DP |
+ #endif
+-- 
+1.9.2
+
