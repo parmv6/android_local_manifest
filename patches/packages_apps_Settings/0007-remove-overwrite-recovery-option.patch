@@ -1,0 +1,124 @@
+From 09ceed99cbbfbf12cb7a050db06be192bbd1c82f Mon Sep 17 00:00:00 2001
+From: zeelog <daniel.zammit@live.com>
+Date: Sat, 7 Jun 2014 21:47:34 +0200
+Subject: [PATCH] Revert "development: Add setting for overwriting recovery"
+
+This reverts commit 9484a4b3a53eaf2f080c21606cb81c71243d192f.
+---
+ res/values/cm_strings.xml                         |  4 ----
+ res/xml/development_prefs.xml                     |  5 -----
+ src/com/android/settings/DevelopmentSettings.java | 18 ------------------
+ 3 files changed, 27 deletions(-)
+
+diff --git a/res/values/cm_strings.xml b/res/values/cm_strings.xml
+index 5e4fca9..474912d 100644
+--- a/res/values/cm_strings.xml
++++ b/res/values/cm_strings.xml
+@@ -489,10 +489,6 @@ two in order to insert additional control points. \'Remove\' deletes the selecte
+     <string name="root_access_adb">ADB only</string>
+     <string name="root_access_all">Apps and ADB</string>
+ 
+-    <!-- Settings checkbox for updating CM recovery on boot -->
+-    <string name="update_recovery_title">Update CM recovery</string>
+-    <string name="update_recovery_summary">Update recovery when installing system updates</string>
+-
+     <string name="ok">OK</string>
+ 
+     <!-- Quiet hours -->
+diff --git a/res/xml/development_prefs.xml b/res/xml/development_prefs.xml
+index 51acc28..d99aca1 100644
+--- a/res/xml/development_prefs.xml
++++ b/res/xml/development_prefs.xml
+@@ -83,11 +83,6 @@
+         android:title="@string/enable_quickboot_title"
+         android:summary="@string/enable_quickboot_summary" />
+ 
+-    <CheckBoxPreference
+-        android:key="update_recovery"
+-        android:title="@string/update_recovery_title"
+-        android:summary="@string/update_recovery_summary" />
+-
+     <PreferenceCategory android:key="debug_debugging_category"
+             android:title="@string/debug_debugging_category">
+ 
+diff --git a/src/com/android/settings/DevelopmentSettings.java b/src/com/android/settings/DevelopmentSettings.java
+index ea210b7..95404a7 100644
+--- a/src/com/android/settings/DevelopmentSettings.java
++++ b/src/com/android/settings/DevelopmentSettings.java
+@@ -116,7 +116,6 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
+     private static final String BUGREPORT = "bugreport";
+     private static final String BUGREPORT_IN_POWER_KEY = "bugreport_in_power";
+     private static final String OPENGL_TRACES_PROPERTY = "debug.egl.trace";
+-    private static final String UPDATE_RECOVERY_PROPERTY = "persist.sys.recovery_update";
+ 
+     private static final String DEBUG_APP_KEY = "debug_app";
+     private static final String WAIT_FOR_DEBUGGER_KEY = "wait_for_debugger";
+@@ -143,7 +142,6 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
+     private static final String DEBUG_DEBUGGING_CATEGORY_KEY = "debug_debugging_category";
+     private static final String DEBUG_APPLICATIONS_CATEGORY_KEY = "debug_applications_category";
+     private static final String WIFI_DISPLAY_CERTIFICATION_KEY = "wifi_display_certification";
+-    private static final String UPDATE_RECOVERY_KEY = "update_recovery";
+ 
+     private static final String ENABLE_QUICKBOOT_KEY = "enable_quickboot";
+     private static final String QUICKBOOT_PACKAGE_NAME = "com.qapp.quickboot";
+@@ -237,8 +235,6 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
+ 
+     private CheckBoxPreference mAdvancedReboot;
+ 
+-    private CheckBoxPreference mUpdateRecovery;
+-
+     private CheckBoxPreference mDevelopmentShortcut;
+ 
+     private final ArrayList<Preference> mAllPrefs = new ArrayList<Preference>();
+@@ -307,7 +303,6 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
+         mPassword = (PreferenceScreen) findPreference(LOCAL_BACKUP_PASSWORD);
+         mAllPrefs.add(mPassword);
+         mAdvancedReboot = findAndInitCheckboxPref(ADVANCED_REBOOT_KEY);
+-        mUpdateRecovery = findAndInitCheckboxPref(UPDATE_RECOVERY_KEY);
+         mDevelopmentShortcut = findAndInitCheckboxPref(DEVELOPMENT_SHORTCUT_KEY);
+ 
+         if (!android.os.Process.myUserHandle().equals(UserHandle.OWNER)) {
+@@ -316,7 +311,6 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
+             disableForUser(mEnableTerminal);
+             disableForUser(mPassword);
+             disableForUser(mAdvancedReboot);
+-            disableForUser(mUpdateRecovery);
+             disableForUser(mDevelopmentShortcut);
+             disableForUser(mQuickBoot);
+         }
+@@ -603,7 +597,6 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
+         updateRootAccessOptions();
+         updateAdvancedRebootOptions();
+         updateDevelopmentShortcutOptions();
+-        updateUpdateRecoveryOptions();
+     }
+ 
+     private void writeAdvancedRebootOptions() {
+@@ -1332,15 +1325,6 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
+             getActivity().getContentResolver(), Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0);
+     }
+ 
+-    private void updateUpdateRecoveryOptions() {
+-        updateCheckBox(mUpdateRecovery, SystemProperties.getBoolean(UPDATE_RECOVERY_PROPERTY, false));
+-    }
+-
+-    private void writeUpdateRecoveryOptions() {
+-        SystemProperties.set(UPDATE_RECOVERY_PROPERTY, mUpdateRecovery.isChecked() ? "true" : "false");
+-        pokeSystemProperties();
+-    }
+-
+     @Override
+     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+         if (buttonView == mEnabledSwitch) {
+@@ -1524,8 +1508,6 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
+             writeDevelopmentShortcutOptions();
+         } else if (preference == mKillAppLongpressBack) {
+             writeKillAppLongpressBackOptions();
+-        } else if (preference == mUpdateRecovery) {
+-            writeUpdateRecoveryOptions();
+         } else {
+             return super.onPreferenceTreeClick(preferenceScreen, preference);
+         }
+-- 
+1.9.3
+
