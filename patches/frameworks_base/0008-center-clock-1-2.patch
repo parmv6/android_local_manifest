@@ -1,0 +1,403 @@
+From d07b98cd0df8e0e3521f00106d8e3b84e20d8489 Mon Sep 17 00:00:00 2001
+From: ihtfp69 <ihtfp69@gmail.com>
+Date: Wed, 9 Jul 2014 23:22:27 -0500
+Subject: [PATCH] SystemUI: allow for the clock to be centered (1 of 2)
+
+This allows the clock to be centered and does
+not break the normal functionality of the status bar.
+Overflow for status bar icons is adjusted accordingly
+when the clock is centered. The clock slides in/out
+when centered and the ticker is running.
+
+PS2:  Fixed formatting
+PS4:  More formatting updates; fixed clock gravity and padding
+PS5:  Removed space
+PS6:  Rebased; Fixed formatting; added second clock view;
+      modified Clock class to stop updating when not visible
+PS7:  Removed center clock container; added bar transitions for the
+      center clock; updated visibility rules
+PS8:  Added calculation for max notification icons whether the center
+      clock is enabled or not
+PS9:  Cleanup
+PS10: Merge clock enabled and position settings into single style setting
+
+Change-Id: I8bb99af278d316d7632cd07ff5c4722c5a27cb12
+---
+ core/java/android/provider/Settings.java           |  7 +-
+ packages/SystemUI/res/layout/status_bar.xml        | 13 +++-
+ .../systemui/statusbar/phone/IconMerger.java       | 16 ++++-
+ .../systemui/statusbar/phone/PhoneStatusBar.java   | 74 ++++++++++++++++++----
+ .../statusbar/phone/PhoneStatusBarTransitions.java |  7 +-
+ .../android/systemui/statusbar/policy/Clock.java   | 37 ++++++++---
+ 6 files changed, 125 insertions(+), 29 deletions(-)
+
+diff --git a/core/java/android/provider/Settings.java b/core/java/android/provider/Settings.java
+index f2bd5e7..2a0f7b0 100644
+--- a/core/java/android/provider/Settings.java
++++ b/core/java/android/provider/Settings.java
+@@ -3071,10 +3071,11 @@ public final class Settings {
+                 "status_bar_battery_show_percent";
+ 
+         /**
+-         * Whether to show the clock in status bar
+-         * of the stock battery icon
++         * Whether to hide the clock, show it in the default
++         * position or show it in the center
+          * 0: don't show the clock
+-         * 1: show the clock
++         * 1: show the clock in the default position
++         * 2: show the clock in the center
+          * default: 1
+          * @hide
+          */
+diff --git a/packages/SystemUI/res/layout/status_bar.xml b/packages/SystemUI/res/layout/status_bar.xml
+index 7e40218..6c992cd 100644
+--- a/packages/SystemUI/res/layout/status_bar.xml
++++ b/packages/SystemUI/res/layout/status_bar.xml
+@@ -118,7 +118,7 @@
+                     android:visibility="gone"
+                     />
+             </LinearLayout>
+-    
++
+             <com.android.systemui.statusbar.policy.Clock
+                 android:id="@+id/clock"
+                 android:textAppearance="@style/TextAppearance.StatusBar.Clock"
+@@ -130,7 +130,16 @@
+                 />
+         </LinearLayout>
+     </LinearLayout>
+-        
++
++    <com.android.systemui.statusbar.policy.Clock
++        android:id="@+id/center_clock"
++        android:textAppearance="@style/TextAppearance.StatusBar.Clock"
++        android:layout_width="wrap_content"
++        android:layout_height="match_parent"
++        android:layout_gravity="center"
++        android:singleLine="true"
++        />
++
+     <LinearLayout android:id="@+id/ticker"
+         android:layout_width="match_parent"
+         android:layout_height="match_parent"
+diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/phone/IconMerger.java b/packages/SystemUI/src/com/android/systemui/statusbar/phone/IconMerger.java
+index 50ead3d..43115cd 100644
+--- a/packages/SystemUI/src/com/android/systemui/statusbar/phone/IconMerger.java
++++ b/packages/SystemUI/src/com/android/systemui/statusbar/phone/IconMerger.java
+@@ -29,6 +29,7 @@ public class IconMerger extends LinearLayout {
+ 
+     private int mIconSize;
+     private View mMoreView;
++    private boolean mCenteredClock = false;
+ 
+     public IconMerger(Context context, AttributeSet attrs) {
+         super(context, attrs);
+@@ -50,6 +51,10 @@ public class IconMerger extends LinearLayout {
+         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+         // we need to constrain this to an integral multiple of our children
+         int width = getMeasuredWidth();
++        if (mCenteredClock) {
++            int totalWidth = mContext.getResources().getDisplayMetrics().widthPixels;
++            width = totalWidth / 2 - mIconSize * 2;
++        }
+         setMeasuredDimension(width - (width % mIconSize), getMeasuredHeight());
+     }
+ 
+@@ -69,7 +74,12 @@ public class IconMerger extends LinearLayout {
+         }
+         final boolean overflowShown = (mMoreView.getVisibility() == View.VISIBLE);
+         // let's assume we have one more slot if the more icon is already showing
+-        if (overflowShown) visibleChildren --;
++        if (overflowShown) {
++            int totalWidth = mContext.getResources().getDisplayMetrics().widthPixels;
++            if (!mCenteredClock || (visibleChildren > (totalWidth / mIconSize / 2 + 1))) {
++                visibleChildren--;
++            }
++        }
+         final boolean moreRequired = visibleChildren * mIconSize > width;
+         if (moreRequired != overflowShown) {
+             post(new Runnable() {
+@@ -80,4 +90,8 @@ public class IconMerger extends LinearLayout {
+             });
+         }
+     }
++
++    public void setCenteredClock(boolean centered) {
++        mCenteredClock = centered;
++    }
+ }
+diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBar.java b/packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBar.java
+index 92e4599..541cbf4 100644
+--- a/packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBar.java
++++ b/packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBar.java
+@@ -112,6 +112,7 @@ import com.android.systemui.statusbar.SignalClusterView;
+ import com.android.systemui.statusbar.StatusBarIconView;
+ import com.android.systemui.statusbar.policy.BatteryController;
+ import com.android.systemui.statusbar.policy.BluetoothController;
++import com.android.systemui.statusbar.policy.Clock;
+ import com.android.systemui.statusbar.policy.DateView;
+ import com.android.systemui.statusbar.policy.DockBatteryController;
+ import com.android.systemui.statusbar.policy.HeadsUpNotificationView;
+@@ -167,6 +168,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
+     private static final int BRIGHTNESS_CONTROL_LONG_PRESS_TIMEOUT = 750; // ms
+     private static final int BRIGHTNESS_CONTROL_LINGER_THRESHOLD = 20;
+ 
++    private static final int CLOCK_STYLE_HIDDEN = 0;
++    private static final int CLOCK_STYLE_DEFAULT = 1;
++    private static final int CLOCK_STYLE_CENTERED = 2;
++
+     // fling gesture tuning parameters, scaled to display density
+     private float mSelfExpandVelocityPx; // classic value: 2000px/s
+     private float mSelfCollapseVelocityPx; // classic value: 2000px/s (will be negated to collapse "up")
+@@ -272,7 +277,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
+ 
+     // clock
+     private boolean mShowClock = true;
+-    private boolean mClockEnabled;
++    private int mClockStyle;
++    private Clock mClockView;
+ 
+     // position
+     int[] mPositionTmp = new int[2];
+@@ -392,11 +398,16 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
+             resolver.registerContentObserver(Settings.System.getUriFor(
+                     Settings.System.NAVBAR_LEFT_IN_LANDSCAPE), false, this);
+             updateSettings();
++            updateClockLocation();
+         }
+ 
+         @Override
+-        public void onChange(boolean selfChange) {
+-            updateSettings();
++        public void onChange(boolean selfChange, Uri uri) {
++            if (uri.equals(Settings.System.getUriFor(Settings.System.STATUS_BAR_CLOCK))) {
++                updateClockLocation();
++            } else {
++                updateSettings();
++            }
+         }
+     }
+ 
+@@ -1612,13 +1623,37 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
+     }
+ 
+     private void updateClockVisibility() {
+-        if (mStatusBarView == null) return;
+-        View clock = mStatusBarView.findViewById(R.id.clock);
+-        if (clock != null) {
+-            clock.setVisibility(mClockEnabled && mShowClock ? View.VISIBLE : View.GONE);
++        if (mClockView != null) {
++            int visibility = mClockStyle != CLOCK_STYLE_HIDDEN
++                    && mShowClock ? View.VISIBLE : View.GONE;
++            if (mClockStyle == CLOCK_STYLE_CENTERED && mTicking) {
++                visibility = View.INVISIBLE;
++            }
++            mClockView.setVisibility(visibility);
+         }
+     }
+ 
++    private void updateClockLocation() {
++        mClockStyle = Settings.System.getIntForUser(mContext.getContentResolver(),
++                Settings.System.STATUS_BAR_CLOCK, CLOCK_STYLE_DEFAULT, mCurrentUserId);
++
++        mNotificationIcons.setCenteredClock(mClockStyle == CLOCK_STYLE_CENTERED);
++        updateNotificationIcons();
++
++        switch (mClockStyle) {
++            case CLOCK_STYLE_DEFAULT:
++                mClockView = (Clock) mStatusBarView.findViewById(R.id.clock);
++                mStatusBarView.findViewById(R.id.center_clock).setVisibility(View.GONE);
++                break;
++            case CLOCK_STYLE_CENTERED:
++                mClockView = (Clock) mStatusBarView.findViewById(R.id.center_clock);
++                mStatusBarView.findViewById(R.id.clock).setVisibility(View.GONE);
++                break;
++        }
++
++        updateClockVisibility();
++    }
++
+     /**
+      * State is one or more of the DISABLE constants from StatusBarManager.
+      */
+@@ -2712,6 +2747,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
+         public void tickerStarting() {
+             mTicking = true;
+             mStatusBarContents.setVisibility(View.GONE);
++            if (mClockStyle == CLOCK_STYLE_CENTERED && mShowClock) {
++                mClockView.setVisibility(View.INVISIBLE);
++                mClockView.startAnimation(
++                        loadAnim(com.android.internal.R.anim.push_up_out, null));
++            }
+             mTickerView.setVisibility(View.VISIBLE);
+             mTickerView.startAnimation(loadAnim(com.android.internal.R.anim.push_up_in, null));
+             mStatusBarContents.startAnimation(loadAnim(com.android.internal.R.anim.push_up_out, null));
+@@ -2721,6 +2761,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
+         public void tickerDone() {
+             mStatusBarContents.setVisibility(View.VISIBLE);
+             mTickerView.setVisibility(View.GONE);
++            if (mClockStyle == CLOCK_STYLE_CENTERED && mShowClock) {
++                mClockView.setVisibility(View.VISIBLE);
++                mClockView.startAnimation(
++                        loadAnim(com.android.internal.R.anim.push_down_in, null));
++            }
+             mStatusBarContents.startAnimation(loadAnim(com.android.internal.R.anim.push_down_in, null));
+             mTickerView.startAnimation(loadAnim(com.android.internal.R.anim.push_down_out,
+                         mTickingDoneListener));
+@@ -2732,7 +2777,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
+                 mStatusBarContents
+                         .startAnimation(loadAnim(com.android.internal.R.anim.fade_in, null));
+             }
++            if (mClockStyle == CLOCK_STYLE_CENTERED && mShowClock) {
++                mClockView.setVisibility(View.VISIBLE);
++                mClockView.startAnimation(
++                        loadAnim(com.android.internal.R.anim.fade_in, null));
++            }
+             mTickerView.setVisibility(View.GONE);
++
+             // we do not animate the ticker away at this point, just get rid of it (b/6992707)
+         }
+     }
+@@ -3200,10 +3251,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
+             mNavigationBarView.setLeftInLandscape(navLeftInLandscape);
+         }
+ 
+-        mClockEnabled = Settings.System.getIntForUser(resolver,
+-                Settings.System.STATUS_BAR_CLOCK, 1, mCurrentUserId) != 0;
+-        updateClockVisibility();
+-
+         int signalStyle = Settings.System.getIntForUser(resolver,
+                 Settings.System.STATUS_BAR_SIGNAL_TEXT,
+                 SignalClusterView.STYLE_NORMAL, mCurrentUserId);
+@@ -3314,6 +3361,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
+             addIcon(slot, i, i, icon);
+         }
+ 
++        // update the clock location
++        updateClockLocation();
++
+         // recreate notifications.
+         for (int i = 0; i < nNotifs; i++) {
+             Pair<IBinder, StatusBarNotification> notifData = notifications.get(i);
+@@ -3550,7 +3600,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
+         }
+         boolean modeChange = command.equals(COMMAND_ENTER) || command.equals(COMMAND_EXIT);
+         if (modeChange || command.equals(COMMAND_CLOCK)) {
+-            dispatchDemoCommandToView(command, args, R.id.clock);
++            mClockView.dispatchDemoCommand(command, args);
+         }
+         if (modeChange || command.equals(COMMAND_BATTERY)) {
+             dispatchDemoCommandToView(command, args, R.id.battery);
+diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBarTransitions.java b/packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBarTransitions.java
+index 7788f06..767cd06 100644
+--- a/packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBarTransitions.java
++++ b/packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBarTransitions.java
+@@ -33,7 +33,7 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
+     private final PhoneStatusBarView mView;
+     private final float mIconAlphaWhenOpaque;
+ 
+-    private View mLeftSide, mStatusIcons, mSignalCluster, mClock;
++    private View mLeftSide, mStatusIcons, mSignalCluster, mClock, mCenterClock;
+     private View mBattery, mDockBattery;
+     private Animator mCurrentAnimation;
+ 
+@@ -55,6 +55,7 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
+         mBattery = mView.findViewById(R.id.battery);
+         mDockBattery = mView.findViewById(R.id.dock_battery);
+         mClock = mView.findViewById(R.id.clock);
++        mCenterClock = mView.findViewById(R.id.center_clock);
+         applyModeBackground(-1, getMode(), false /*animate*/);
+         applyMode(getMode(), false /*animate*/);
+     }
+@@ -99,7 +100,8 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
+                     animateTransitionTo(mSignalCluster, newAlpha),
+                     animateTransitionTo(mDockBattery, newAlphaBC),
+                     animateTransitionTo(mBattery, newAlphaBC),
+-                    animateTransitionTo(mClock, newAlphaBC)
++                    animateTransitionTo(mClock, newAlphaBC),
++                    animateTransitionTo(mCenterClock, newAlphaBC)
+                     );
+             if (mode == MODE_LIGHTS_OUT) {
+                 anims.setDuration(LIGHTS_OUT_DURATION);
+@@ -113,6 +115,7 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
+             mDockBattery.setAlpha(newAlphaBC);
+             mBattery.setAlpha(newAlphaBC);
+             mClock.setAlpha(newAlphaBC);
++            mCenterClock.setAlpha(newAlphaBC);
+         }
+     }
+ }
+diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/policy/Clock.java b/packages/SystemUI/src/com/android/systemui/statusbar/policy/Clock.java
+index 13caa0a..92654e3 100644
+--- a/packages/SystemUI/src/com/android/systemui/statusbar/policy/Clock.java
++++ b/packages/SystemUI/src/com/android/systemui/statusbar/policy/Clock.java
+@@ -52,6 +52,7 @@ import libcore.icu.LocaleData;
+  */
+ public class Clock extends TextView implements DemoMode, OnClickListener, OnLongClickListener {
+     private boolean mAttached;
++    private boolean mReceiverRegistered;
+     private Calendar mCalendar;
+     private String mClockFormatString;
+     private SimpleDateFormat mClockFormat;
+@@ -80,12 +81,9 @@ public class Clock extends TextView implements DemoMode, OnClickListener, OnLong
+         }
+     }
+ 
+-    @Override
+-    protected void onAttachedToWindow() {
+-        super.onAttachedToWindow();
+-
+-        if (!mAttached) {
+-            mAttached = true;
++    private void updateReceiverState() {
++        boolean shouldBeRegistered = mAttached && getVisibility() != GONE;
++        if (shouldBeRegistered && !mReceiverRegistered) {
+             IntentFilter filter = new IntentFilter();
+ 
+             filter.addAction(Intent.ACTION_TIME_TICK);
+@@ -95,7 +93,19 @@ public class Clock extends TextView implements DemoMode, OnClickListener, OnLong
+             filter.addAction(Intent.ACTION_USER_SWITCHED);
+ 
+             getContext().registerReceiver(mIntentReceiver, filter, null, getHandler());
++            mReceiverRegistered = true;
++        } else if (!shouldBeRegistered && mReceiverRegistered) {
++            getContext().unregisterReceiver(mIntentReceiver);
++            mReceiverRegistered = false;
+         }
++    }
++
++    @Override
++    protected void onAttachedToWindow() {
++        super.onAttachedToWindow();
++
++        mAttached = true;
++        updateReceiverState();
+ 
+         // NOTE: It's safe to do these after registering the receiver since the receiver always runs
+         // in the main thread, therefore the receiver can't run before this method returns.
+@@ -110,9 +120,18 @@ public class Clock extends TextView implements DemoMode, OnClickListener, OnLong
+     @Override
+     protected void onDetachedFromWindow() {
+         super.onDetachedFromWindow();
+-        if (mAttached) {
+-            getContext().unregisterReceiver(mIntentReceiver);
+-            mAttached = false;
++        mAttached = false;
++        updateReceiverState();
++    }
++
++    @Override
++    protected void onVisibilityChanged(View changedView, int visibility) {
++        super.onVisibilityChanged(changedView, visibility);
++        boolean wasRegistered = mReceiverRegistered;
++        updateReceiverState();
++        if (!wasRegistered && mReceiverRegistered) {
++            mCalendar = Calendar.getInstance(TimeZone.getDefault());
++            updateClock();
+         }
+     }
+ 
+-- 
+1.9.3
+

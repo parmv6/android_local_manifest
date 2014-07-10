@@ -61,7 +61,7 @@ index ea210b7..95404a7 100644
  
      private static final String ENABLE_QUICKBOOT_KEY = "enable_quickboot";
      private static final String QUICKBOOT_PACKAGE_NAME = "com.qapp.quickboot";
-@@ -237,8 +235,6 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
+@@ -244,8 +244,6 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
  
      private CheckBoxPreference mAdvancedReboot;
  
@@ -69,8 +69,8 @@ index ea210b7..95404a7 100644
 -
      private CheckBoxPreference mDevelopmentShortcut;
  
-     private final ArrayList<Preference> mAllPrefs = new ArrayList<Preference>();
-@@ -307,7 +303,6 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
+     private CheckBoxPreference mUsbCharging;
+@@ -316,7 +314,6 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
          mPassword = (PreferenceScreen) findPreference(LOCAL_BACKUP_PASSWORD);
          mAllPrefs.add(mPassword);
          mAdvancedReboot = findAndInitCheckboxPref(ADVANCED_REBOOT_KEY);
@@ -78,7 +78,7 @@ index ea210b7..95404a7 100644
          mDevelopmentShortcut = findAndInitCheckboxPref(DEVELOPMENT_SHORTCUT_KEY);
  
          if (!android.os.Process.myUserHandle().equals(UserHandle.OWNER)) {
-@@ -316,7 +311,6 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
+@@ -325,7 +322,6 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
              disableForUser(mEnableTerminal);
              disableForUser(mPassword);
              disableForUser(mAdvancedReboot);
@@ -86,7 +86,7 @@ index ea210b7..95404a7 100644
              disableForUser(mDevelopmentShortcut);
              disableForUser(mQuickBoot);
          }
-@@ -603,7 +597,6 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
+@@ -621,7 +617,6 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
          updateRootAccessOptions();
          updateAdvancedRebootOptions();
          updateDevelopmentShortcutOptions();
@@ -94,7 +94,7 @@ index ea210b7..95404a7 100644
      }
  
      private void writeAdvancedRebootOptions() {
-@@ -1332,15 +1325,6 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
+@@ -1350,15 +1345,6 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
              getActivity().getContentResolver(), Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0);
      }
  
@@ -107,18 +107,18 @@ index ea210b7..95404a7 100644
 -        pokeSystemProperties();
 -    }
 -
-     @Override
-     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-         if (buttonView == mEnabledSwitch) {
-@@ -1524,8 +1508,6 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
+     /**
+      * Restore the properties associated with this preference on boot
+      * @param context A valid context
+@@ -1567,8 +1553,6 @@ public class DevelopmentSettings extends RestrictedSettingsFragment
              writeDevelopmentShortcutOptions();
          } else if (preference == mKillAppLongpressBack) {
              writeKillAppLongpressBackOptions();
 -        } else if (preference == mUpdateRecovery) {
 -            writeUpdateRecoveryOptions();
+         } else if (preference == mUsbCharging) {
+             return UsbCharging.setEnabled(mUsbCharging.isChecked());
          } else {
-             return super.onPreferenceTreeClick(preferenceScreen, preference);
-         }
 -- 
 1.9.3
 

@@ -1,7 +1,7 @@
-From 7d6d80e493f0a162d31b6168e74ab6f885e5d435 Mon Sep 17 00:00:00 2001
+From 1d1d0f44c9c68b9d9e6a4832a7dc3c82b116aa90 Mon Sep 17 00:00:00 2001
 From: Konsta <konsta09@gmail.com>
 Date: Tue, 18 Dec 2012 14:48:22 +0200
-Subject: [PATCH 07/13] add battery bar (1/2)
+Subject: [PATCH 2/4] add battery bar (1/2)
 
 Change-Id: I6a3f3028946829e4117a519c827bdd6d88912e1d
 ---
@@ -16,10 +16,10 @@ Change-Id: I6a3f3028946829e4117a519c827bdd6d88912e1d
  create mode 100644 packages/SystemUI/src/com/android/systemui/statusbar/phone/BatteryBar.java
 
 diff --git a/core/java/android/provider/Settings.java b/core/java/android/provider/Settings.java
-index 52d416b..72c8c1a 100644
+index 280c2ad..ede391d 100644
 --- a/core/java/android/provider/Settings.java
 +++ b/core/java/android/provider/Settings.java
-@@ -2933,6 +2933,7 @@ public final class Settings {
+@@ -3056,6 +3056,7 @@ public final class Settings {
           * 4: Hide the battery status information
           * 5: Display the battery an icon in landscape mode
           * 6: Display the battery as plain text
@@ -63,10 +63,10 @@ index 0000000..38a03cd
 +
 +</layer-list>
 diff --git a/packages/SystemUI/res/layout/status_bar.xml b/packages/SystemUI/res/layout/status_bar.xml
-index 9ecf40e..ab98800 100644
+index 7902f73..7e40218 100644
 --- a/packages/SystemUI/res/layout/status_bar.xml
 +++ b/packages/SystemUI/res/layout/status_bar.xml
-@@ -172,4 +172,9 @@
+@@ -173,4 +173,9 @@
                  />
          </com.android.systemui.statusbar.phone.TickerView>
      </LinearLayout>
@@ -74,13 +74,13 @@ index 9ecf40e..ab98800 100644
 +    <com.android.systemui.statusbar.phone.BatteryBar
 +        style="@style/StatusBar.BatteryBar"
 +        android:layout_width="match_parent"
-+        android:layout_height="1dip" />
++        android:layout_height="1.5dp" />
  </com.android.systemui.statusbar.phone.PhoneStatusBarView>
 diff --git a/packages/SystemUI/res/values/styles.xml b/packages/SystemUI/res/values/styles.xml
-index 23d05b4..abe8be5 100644
+index 8b77ebd..c3231e4 100644
 --- a/packages/SystemUI/res/values/styles.xml
 +++ b/packages/SystemUI/res/values/styles.xml
-@@ -178,4 +178,10 @@
+@@ -184,4 +184,10 @@
          <item name="android:textSize">14dp</item>
      </style>
      
@@ -271,10 +271,10 @@ index 0000000..50b3ea3
 +
 +}
 diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBar.java b/packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBar.java
-index a7cabd3..b897562 100644
+index 9be0495..c0b9436 100644
 --- a/packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBar.java
 +++ b/packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBar.java
-@@ -2906,6 +2906,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
+@@ -3167,6 +3167,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                  mode = BatteryMeterMode.BATTERY_METER_TEXT;
                  break;
  
