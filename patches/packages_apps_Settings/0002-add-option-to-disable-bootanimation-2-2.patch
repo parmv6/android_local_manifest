@@ -42,11 +42,11 @@ index f46a379..4e3a334 100644
              android:key="pref_force_highend_gfx"
              android:title="@string/pref_force_highend_gfx_title"
 diff --git a/src/com/android/settings/cyanogenmod/PerformanceSettings.java b/src/com/android/settings/cyanogenmod/PerformanceSettings.java
-index e8406be..966d7a3 100644
+index 501aadc..34aaf22 100644
 --- a/src/com/android/settings/cyanogenmod/PerformanceSettings.java
 +++ b/src/com/android/settings/cyanogenmod/PerformanceSettings.java
 @@ -55,11 +55,15 @@ public class PerformanceSettings extends SettingsPreferenceFragment implements
-     private static final String USE_16BPP_ALPHA_PROP = "persist.sys.use_16bpp_alpha";
+     private static final String USE_16BPP_ALPHA_PROP = "persist.sys.prefer_16bpp";
      private static final String HWA_SETTINGS_KEY = "hwa_settings";
  
 +    private static final String DISABLE_BOOTANIMATION_PREF = "pref_disable_bootanimation";

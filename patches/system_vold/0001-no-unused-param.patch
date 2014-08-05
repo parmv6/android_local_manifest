@@ -6,11 +6,11 @@ Subject: [PATCH] add -Wno-unused-parameter to make gcc 4.8 happy
 Change-Id: I293f80ea344214956364c2e316d48885524bf5ee
 
 diff --git a/Android.mk b/Android.mk
-index 4fc541c..3ed123c 100644
+index 7037292..062c6be 100644
 --- a/Android.mk
 +++ b/Android.mk
-@@ -16,7 +16,7 @@ ifneq ($(TARGET_USE_CUSTOM_LUN_FILE_PATH),)
- common_cflags += -DCUSTOM_LUN_FILE=\"$(TARGET_USE_CUSTOM_LUN_FILE_PATH)\"
+@@ -20,7 +20,7 @@ ifeq ($(BOARD_VOLD_CRYPTFS_MIGRATE), true)
+ common_cflags += -DCRYPTFS_MIGRATE
  endif
  
 -common_cflags += -Werror

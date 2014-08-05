@@ -19,7 +19,7 @@ index 2f3c1c3..ad329d1 100644
      <string name="p2p_device_name_input_limit">P2P name exceeds maximum length</string>
  
 +    <!-- Konsta forum link -->
-+    <string name="konsta_web_title">CyanogenMod 11 - ZeeLogKANG</string>
++    <string name="konsta_web_title">CM11 - ZeeLogKANG</string>
 +    <string name="konsta_web_summary">Visit MoDaCo thread</string>
 +    <string name="konsta_web_url">http://www.modaco.com/topic/368013-cyanogenmod11/</string>
 +

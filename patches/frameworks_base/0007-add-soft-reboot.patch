@@ -1,0 +1,125 @@
+From 1866691dd86ff0e0148752703108d0ffa791445b Mon Sep 17 00:00:00 2001
+From: Roman Birg <roman@cyngn.com>
+Date: Thu, 10 Jul 2014 14:20:42 -0700
+Subject: [PATCH] advanced reboot: add soft reboot option
+
+Adds a "Soft reboot" option which restarts zygote, as requested in JIRA
+CYAN-3998
+
+Change-Id: Ia6e5ed9b053e1c5ebd1fc55e5692858b97f7e0fc
+Signed-off-by: Roman Birg <roman@cyngn.com>
+---
+ core/res/res/values/cm_arrays.xml                  |  2 ++
+ core/res/res/values/cm_strings.xml                 |  2 ++
+ .../com/android/server/power/ShutdownThread.java   | 29 +++++++++++++++++++---
+ 3 files changed, 30 insertions(+), 3 deletions(-)
+
+diff --git a/core/res/res/values/cm_arrays.xml b/core/res/res/values/cm_arrays.xml
+index fe5c884..85157ff 100644
+--- a/core/res/res/values/cm_arrays.xml
++++ b/core/res/res/values/cm_arrays.xml
+@@ -18,6 +18,7 @@
+     <!-- Defines the shutdown options shown in the reboot dialog. -->
+     <array name="shutdown_reboot_options" translatable="false">
+         <item>@string/reboot_reboot</item>
++        <item>@string/reboot_soft</item>
+         <item>@string/reboot_recovery</item>
+         <item>@string/reboot_bootloader</item>
+     </array>
+@@ -26,6 +27,7 @@
+          The first item should be empty for regular reboot. -->
+     <string-array name="shutdown_reboot_actions" translatable="false">
+         <item></item>
++        <item>soft_reboot</item>
+         <item>recovery</item>
+         <item>bootloader</item>
+     </string-array>
+diff --git a/core/res/res/values/cm_strings.xml b/core/res/res/values/cm_strings.xml
+index dcd043a..9e42b47 100644
+--- a/core/res/res/values/cm_strings.xml
++++ b/core/res/res/values/cm_strings.xml
+@@ -59,6 +59,8 @@
+     <string name="reboot_fastboot">Fastboot</string>
+     <!-- Button to reboot the phone into download, within the Reboot Options dialog -->
+     <string name="reboot_download">Download</string>
++    <!-- Button to soft reboot the device, within the Reboot Options dialog -->
++    <string name="reboot_soft">Soft reboot</string>
+ 
+     <!-- Reboot Progress Dialog. This is shown if the user chooses to reboot the phone. -->
+     <string name="reboot_progress">Rebooting\u2026</string>
+diff --git a/services/java/com/android/server/power/ShutdownThread.java b/services/java/com/android/server/power/ShutdownThread.java
+index fd54c01..05f92f5 100644
+--- a/services/java/com/android/server/power/ShutdownThread.java
++++ b/services/java/com/android/server/power/ShutdownThread.java
+@@ -21,6 +21,7 @@ package com.android.server.power;
+ 
+ import java.util.concurrent.atomic.AtomicBoolean;
+ 
++import android.app.ActivityManager;
+ import android.app.ActivityManagerNative;
+ import android.app.AlertDialog;
+ import android.app.Dialog;
+@@ -75,8 +76,11 @@ public final class ShutdownThread extends Thread {
+ 
+     private static boolean mReboot;
+     private static boolean mRebootSafeMode;
++    private static boolean mRebootSoft;
+     private static String mRebootReason;
+ 
++    public static final String SOFT_REBOOT = "soft_reboot";
++
+     // Provides shutdown assurance in case the system_server is killed
+     public static final String SHUTDOWN_ACTION_PROPERTY = "sys.shutdown.requested";
+ 
+@@ -183,19 +187,37 @@ public final class ShutdownThread extends Thread {
+ 
+                                     String actions[] = context.getResources().getStringArray(com.android.internal.R.array.shutdown_reboot_actions);
+ 
+-                                    if (actions != null && which < actions.length)
++                                    if (actions != null && which < actions.length) {
+                                         mRebootReason = actions[which];
++                                        if (actions[which].equals(SOFT_REBOOT)) {
++                                            mRebootSoft = true;
++                                        }
++                                    }
+                                 }
+                             })
+                             .setPositiveButton(com.android.internal.R.string.yes, new DialogInterface.OnClickListener() {
+                                 public void onClick(DialogInterface dialog, int which) {
+-                                    mReboot = true;
+-                                    beginShutdownSequence(context);
++                                    if (mRebootSoft) {
++                                        mRebootSoft = false;
++                                        try {
++                                            final IActivityManager am =
++                                                    ActivityManagerNative.asInterface(ServiceManager.checkService("activity"));
++                                            if (am != null) {
++                                                am.restart();
++                                            }
++                                        } catch (RemoteException e) {
++                                            Log.e(TAG, "failure trying to perform soft reboot", e);
++                                        }
++                                    } else {
++                                        mReboot = true;
++                                        beginShutdownSequence(context);
++                                    }
+                                 }
+                             })
+                             .setNegativeButton(com.android.internal.R.string.no, new DialogInterface.OnClickListener() {
+                                 public void onClick(DialogInterface dialog, int which) {
+                                     mReboot = false;
++                                    mRebootSoft = false;
+                                     dialog.cancel();
+                                 }
+                             })
+@@ -204,6 +226,7 @@ public final class ShutdownThread extends Thread {
+                                 public boolean onKey (DialogInterface dialog, int keyCode, KeyEvent event) {
+                                     if (keyCode == KeyEvent.KEYCODE_BACK) {
+                                         mReboot = false;
++                                        mRebootSoft = false;
+                                         dialog.cancel();
+                                     }
+                                     return true;
+-- 
+1.9.3
+
