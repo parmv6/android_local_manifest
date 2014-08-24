@@ -3,6 +3,7 @@
     <!-- Removals -->
     <remove-project name="androidarmv6/android_build" />
     <remove-project name="androidarmv6/android_vendor_cm" />
+    <remove-project name="androidarmv6/android_system_netd" />
     <!-- ZTE Blade -->
     <project path="device/zte/blade" name="zeelog/android_device_zte_blade" remote="github" revision="cm-11.0" />
     <project path="kernel/zte/zte-kernel-msm7x27" name="zeelog/zte-kernel-msm7x27" remote="github" revision="cm-11.0" />
@@ -10,6 +11,7 @@
     <!-- Local projects -->
     <project path="build" name="parmv6/android_build" remote="github" revision="cm-11.0" />
     <project path="vendor/cm" name="parmv6/android_vendor_cm" remote="github" revision="cm-11.0" />
+    <project path="system/netd" name="parmv6/android_system_netd" remote="github" revision="cm-11.0" />
     <project path="hardware/atheros/wifi/libs" name="androidarmv6/android_hardware_atheros_wifi_libs" remote="github" revision="cm-11.0" />
     <project path="hardware/atheros/ar6000_sdk2" name="plaguedbypenguins/atheros_sdk2" remote="github" revision="master" />
     <project path="packages/apps/Effem" name="legaCyMod/android_packages_apps_Effem" remote="github" revision="master" />
