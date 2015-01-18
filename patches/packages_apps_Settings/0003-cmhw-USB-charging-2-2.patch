@@ -12,12 +12,12 @@ Change-Id: I06eb61da830ee57e7e8b3f75ea83f4ea1851e5b7
  4 files changed, 62 insertions(+)
 
 diff --git a/res/values/cm_strings.xml b/res/values/cm_strings.xml
-index 1084ed1..7379448 100644
+index 379d6ec..88e0c4b 100644
 --- a/res/values/cm_strings.xml
 +++ b/res/values/cm_strings.xml
-@@ -735,6 +735,11 @@ two in order to insert additional control points. \'Remove\' deletes the selecte
-     <string name="gamma_tuning_brightness">Brightness</string>
-     <string name="gamma_tuning_saturation">Saturation</string>
+@@ -726,6 +726,11 @@ two in order to insert additional control points. \'Remove\' deletes the selecte
+     <!-- Used if no name provided by overlay -->
+     <string name="gamma_tuning_control_set_header">Group <xliff:g id="index">%d</xliff:g></string>
  
 +    <!-- Hardware tunables - USB charging -->
 +    <string name="charging_category">Charging</string>
